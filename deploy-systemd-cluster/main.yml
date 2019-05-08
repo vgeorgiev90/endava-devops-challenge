@@ -7,28 +7,32 @@
   - gen-pki
 
 - hosts: etcd
-  user: root
+  user: ubuntu
+  become: yes
   connection: ssh
   gather_facts: true
   roles:
   - etcd
 
 - hosts: masters
-  user: root
+  user: ubuntu
+  become: yes
   connection: ssh
   gather_facts: true
   roles:
   - master-bootstrap
 
 - hosts: workers
-  user: root
+  user: ubuntu
+  become: yes
   connection: ssh
   gather_facts: true
   roles:
   - worker-bootstrap
 
 - hosts: masters
-  user: root
+  user: ubuntu
+  become: yes
   connection: ssh
   gather_facts: true
   roles:

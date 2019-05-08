@@ -4,6 +4,15 @@ provider "aws" {
   region = "${var.region}"
 }
 
+locals {
+  instance-userdata = <<EOF
+#!/bin/bash
+export PATH=$PATH:/usr/local/bin
+apt-get install python-minimal -y
+EOF
+}
+
+
 ###################### VPC creation ##################
 
 resource "aws_vpc" "cluster_vpc" {
@@ -148,6 +157,7 @@ resource "aws_instance" "master" {
   vpc_security_group_ids = ["${aws_security_group.cluster_sg.id}", "${aws_security_group.public_sg.id}"]
   subnet_id              = "${aws_subnet.public.id}"
   associate_public_ip_address = true
+  user_data_base64 = "${base64encode(local.instance-userdata)}"
   tags {
     Name = "Master Node"
   }
@@ -161,6 +171,7 @@ resource "aws_instance" "worker1" {
   vpc_security_group_ids = ["${aws_security_group.cluster_sg.id}", "${aws_security_group.public_sg.id}"]
   subnet_id              = "${aws_subnet.public.id}"
   associate_public_ip_address = true
+  user_data_base64 = "${base64encode(local.instance-userdata)}"
   tags {
     Name = "Worker1"
   }
@@ -174,6 +185,7 @@ resource "aws_instance" "worker2" {
   vpc_security_group_ids = ["${aws_security_group.cluster_sg.id}", "${aws_security_group.public_sg.id}"]
   subnet_id              = "${aws_subnet.public.id}"
   associate_public_ip_address = true
+  user_data_base64 = "${base64encode(local.instance-userdata)}"
   tags {
     Name = "Worker2"
   }

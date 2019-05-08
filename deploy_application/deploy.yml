@@ -1,0 +1,25 @@
+---
+- hosts: kubernetes
+  user: ubuntu
+  become: yes
+  connection: ssh
+  gather_facts: false
+  tasks:
+  - apt: name=python-yaml state=latest
+  - name: Create a kubernetes namespace
+    kubernetes:
+      api_endpoint: 10.100.1.221:6443
+      url_username: admin
+      url_password: hD8mYC6yuaKrBn8pymDU
+      inline_data:
+        kind: Namespace
+        apiVersion: v1
+        metadata:
+          name: ansible-test
+          labels:
+            label_env: production
+            label_ver: latest
+          annotations:
+            a1: value1
+            a2: value2
+      state: present
