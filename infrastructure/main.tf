@@ -8,6 +8,7 @@ locals {
   instance-userdata = <<EOF
 #!/bin/bash
 export PATH=$PATH:/usr/local/bin
+sleep 60
 apt-get install python-minimal -y
 EOF
 }
@@ -79,9 +80,9 @@ resource "aws_security_group" "cluster_sg" {
   }
 
   ingress {
-   from_port = 22
-   to_port = 22
-   protocol = "tcp"
+   from_port = 0
+   to_port = 0
+   protocol = "-1"
    cidr_blocks = ["${var.access_ip}"]
   }
 
@@ -172,6 +173,11 @@ resource "aws_instance" "worker1" {
   subnet_id              = "${aws_subnet.public.id}"
   associate_public_ip_address = true
   user_data_base64 = "${base64encode(local.instance-userdata)}"
+  ebs_block_device {
+	device_name = "/dev/xvdf"
+	volume_type = "gp2"
+	volume_size = "20"
+  }
   tags {
     Name = "Worker1"
   }
@@ -186,6 +192,11 @@ resource "aws_instance" "worker2" {
   subnet_id              = "${aws_subnet.public.id}"
   associate_public_ip_address = true
   user_data_base64 = "${base64encode(local.instance-userdata)}"
+  ebs_block_device {
+        device_name = "/dev/xvdf"
+        volume_type = "gp2"
+        volume_size = "20"
+  }
   tags {
     Name = "Worker2"
   }

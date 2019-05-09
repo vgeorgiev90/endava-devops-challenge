@@ -1,3 +1,5 @@
+- shell: rm /etc/resolv.conf -rf && echo "nameserver 8.8.8.8" > /etc/resolv.conf && echo "search eu-west-1.compute.internal" >> /etc/resolv.conf
+
 - include_tasks: docker.yml
 
 - include_tasks: binaries.yml

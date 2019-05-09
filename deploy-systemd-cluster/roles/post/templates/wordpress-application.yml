@@ -1,0 +1,182 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-replica
+  namespace: default
+  labels:
+    mysql: replica
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+  type: ClusterIP
+  selector:
+    app: mysql-replica
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-replica
+  namespace: default
+spec:
+  serviceName: mysql-replica
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-replica
+  template:
+    metadata:
+      name: mysql-replica
+      labels:
+        app: mysql-replica
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.6
+        env:
+        - name: "MYSQL_ROOT_PASSWORD"
+          value: "viktor123"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - bash
+              - "-c"
+              - |
+                sleep 60
+                echo "[client]" > /root/.my.cnf
+                echo "user=root" >> /root/.my.cnf
+                echo "password=${MYSQL_ROOT_PASSWORD}" >> /root/.my.cnf
+                echo "create database application;" | mysql
+                echo "grant all on application.* to 'application'@'%' identified by 'application123';" | mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+
+---
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: default
+  labels:
+    php: web
+spec:
+  ports:
+  - name: web
+    port: 80
+  type: ClusterIP
+  selector:
+    app: web
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+  namespace: default
+spec:
+  serviceName: web
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      name: web
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: webserver
+        image: viktor90/nginx:php5.6
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: web-data
+          mountPath: /usr/share/nginx/html
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - bash
+              - "-c"
+              - |
+                /usr/sbin/php-fpm5.6
+                echo "#!/bin/bash" > /root/deploy.sh
+                echo "rm -rf /usr/share/nginx/html/*" >> /root/deploy.sh
+                echo "apt-get install unzip wget -y" >> /root/deploy.sh
+                echo "wget https://wordpress.org/latest.zip -P /usr/share/nginx/html" >> /root/deploy.sh
+                echo "unzip /usr/share/nginx/html/latest.zip -d /usr/share/nginx/html" >> /root/deploy.sh
+                echo "mv /usr/share/nginx/html/wordpress/wp-config-sample.php /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
+                echo "chown -R nginx:nginx /usr/share/nginx/html/wordpress" >> /root/deploy.sh
+                echo "sed -i 's/database_name_here/application/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
+                echo "sed -i 's/username_here/application/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
+                echo "sed -i 's/password_here/application123/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
+                echo "sed -i 's/localhost/mysql-replica.default.svc.cluster.local/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
+                echo 'echo "server {" > /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "listen 80;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "server_name endava.example.site;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "root   /usr/share/nginx/html/wordpress;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "index  index.php index.html index.htm;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "include /etc/nginx/wordpress.conf;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "include /etc/nginx/limits.conf;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo 'echo "}" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
+                echo "/usr/sbin/nginx -s reload" >> /root/deploy.sh
+                chmod +x /root/deploy.sh
+  volumeClaimTemplates:
+  - metadata:
+      name: web-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+
+---
+
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    name: wordpress-app
+    namespace: default
+  spec:
+    rules:
+    - host: endava.example.site
+      http:
+        paths:
+        - backend:
+            serviceName: web
+            servicePort: 80
+          path: /
+
+---
+
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: web
+
+

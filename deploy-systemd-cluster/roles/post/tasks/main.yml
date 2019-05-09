@@ -3,8 +3,29 @@
     state: directory
 
 - copy:
-    src: ../templates/ingress.yml
-    dest: /root/post-install/ingress.yml
+    src: ../templates/dashboard-ingress.yml
+    dest: /root/post-install/dashboard-ingress.yml
+
+- copy:
+    src: ../templates/weave-ingress.yml
+    dest: /root/post-install/weave-ingress.yml
+
+- copy:
+    src: ../templates/grafana-ingress.yml
+    dest: /root/post-install/grafana-ingress.yml
+
+- copy:
+    src: ../templates/auth
+    dest: /root/post-install/auth
+
+- copy:
+    src: ../templates/deploy.sh
+    dest: /root/post-install/deploy.sh
+    mode: 0755
+
+- copy:
+    src: ../templates/wordpress-application.yml
+    dest: /root/post-install/wordpress-application.yml
 
 - include_tasks: helm.yml
   run_once: true
@@ -18,4 +39,6 @@
 - include_tasks: monitoring.yml
   run_once: true
 
-#- include_tasks: heketi.yml
+- include_tasks: heketi.yml
+
+- shell: /root/post-install/deploy.sh ingress
