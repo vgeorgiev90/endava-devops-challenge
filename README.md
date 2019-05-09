@@ -12,3 +12,41 @@
 
 ## Time Box 
 The task should be completed within 5 days. 
+
+
+## Solution
+1) Terraform deployed infrastructure that consist of VPC, Subnet, Internet GW , 2 Security groups, 3 EC2 nodes
+2) For the application stack the infrastructure choosen is kubernetes cluster deployed with systemd services rather than kubeadm , it is deployed with ansible playbook as well as most of the configuration
+3) The application consist of: mysql container , nginx and php containers which hosts wordpress installation.
+4) Monitoring solutions: Weave scope application which is part monitoring part utility , prometheus-grafana stack for detailed monitoring, kubernetes dashboard for ease of management.
+5) Service fail-over is achieved with the kubernetes api , as well as with pod disruption budged.
+
+Workflow:
+1. Configure AWS-cli and install terraform, ansible
+2. Add all needed variables in terraform.tfvars file
+3. Provision the infrastructure with terraform apply, after this is done note the output as it will be needed
+4. Because of the OS choosen is ubuntu 18 and the way that AWS launches the instances prevent package installation user-data run support/get-python.sh script so python can be installed
+4. With the output from terraform add all needed information in the hosts file for deploy-systemd-cluster ansible playbook (if the values are not supplied correctly there will be problems with the cluster deployment)
+5. Login to the master node and deploy heketi pod , after this is done run /root/post-install/deploy.sh get-key (this is the public key which needs to be added to authorized_keys file for the root user on every worker node) , exec into the container and change node* and device accordingly in /etc/heketi/topology.json , load the topology file: heketi-cli topology load --json=/etc/heketi/topology.json.
+After this is done execute heketi-cli cluster list and note down the cluster id
+6. Modify the file /root/post-install/storage-class.yml change the url to http://MASTER-IP:31000 and add the cluster id, create the storage class and then patch it to become the default storageclass for the cluster
+(kubectl patch storageclass glusterfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}')
+7. Application can be deployed now with /root/post-install/deploy.sh deploy-app
+Optional:
+Change the ingress node port service ports to be http - 80, https - 443 instead of random high number ports
+
+
+Notes:
+URLS: 
+weave scope app: http://weave.cluster
+monitoring: http://grafana.cluster
+dashboard: http://dashboard.cluster
+default credentials (not for dashboard of course)
+user: admin
+password: admin123
+Virtual host for the wordpress app: 
+http://endava.example.site  - (there is no DNS so it should be pointed to one of the public IPs localy)
+
+Things that needs to be done manually (for the moment)
+- modify your ansible hosts file
+- bootstrap glusterfs cluster with heketi
