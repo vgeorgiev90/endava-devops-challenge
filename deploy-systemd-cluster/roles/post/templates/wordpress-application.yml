@@ -150,22 +150,21 @@ spec:
 
 ---
 
-apiVersion: v1
-items:
-- apiVersion: extensions/v1beta1
-  kind: Ingress
-  metadata:
-    name: wordpress-app
-    namespace: default
-  spec:
-    rules:
-    - host: endava.example.site
-      http:
-        paths:
-        - backend:
-            serviceName: web
-            servicePort: 80
-          path: /
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wordpress-app
+  namespace: default
+spec:
+  rules:
+  - host: endava.example.site
+    http:
+      paths:
+      - backend:
+          serviceName: web
+          servicePort: 80
+        path: /
 
 ---
 
