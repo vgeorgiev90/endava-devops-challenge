@@ -37,16 +37,21 @@ Change the ingress node port service ports to be http - 80, https - 443 instead 
 
 
 Notes:
-URLS: 
-weave scope app: http://weave.cluster
-monitoring: http://grafana.cluster
-dashboard: http://dashboard.cluster
+URLS (no external DNS): 
+- weave scope app: http://weave.cluster
+- monitoring: http://grafana.cluster
+- dashboard: http://dashboard.cluster
 default credentials (not for dashboard of course)
-user: admin
-password: admin123
+- user: admin
+- password: admin123
 Virtual host for the wordpress app: 
-http://endava.example.site  - (there is no DNS so it should be pointed to one of the public IPs localy)
+- http://endava.example.site  - (there is no DNS so it should be pointed to one of the public IPs localy)
 
 Things that needs to be done manually (for the moment)
 - modify your ansible hosts file
 - bootstrap glusterfs cluster with heketi
+
+TODO:
+- Add metrics server and Horizontal pod autoscalling for the app
+- Automate glusterfs clustering
+- Maybe refine a thing or two :)
