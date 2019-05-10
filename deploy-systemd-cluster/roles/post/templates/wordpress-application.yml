@@ -124,7 +124,7 @@ spec:
                 echo "wget https://wordpress.org/latest.zip -P /usr/share/nginx/html" >> /root/deploy.sh
                 echo "unzip /usr/share/nginx/html/latest.zip -d /usr/share/nginx/html" >> /root/deploy.sh
                 echo "mv /usr/share/nginx/html/wordpress/wp-config-sample.php /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
-                echo "chown -R nginx:nginx /usr/share/nginx/html/wordpress" >> /root/deploy.sh
+                echo "chown -R nginx:nginx /usr/share/nginx/html" >> /root/deploy.sh
                 echo "sed -i 's/database_name_here/application/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
                 echo "sed -i 's/username_here/application/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
                 echo "sed -i 's/password_here/application123/g' /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
@@ -149,7 +149,6 @@ spec:
           storage: 2Gi
 
 ---
-
 
 apiVersion: extensions/v1beta1
 kind: Ingress

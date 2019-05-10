@@ -33,17 +33,11 @@ Workflow:
 4. With the output from terraform add all needed information in the hosts file for deploy-systemd-cluster ansible playbook (if the values are not supplied correctly there will be problems with the cluster deployment)
 5. Login to the master node: 
   - label the master node with app=heketi 
-  - change cluster_size to the worker node count
-  - deploy heketi pod
+  - deploy heketi pod (cluster_size hardcoded for 2 nodes)
   - after this is done run /root/post-install/deploy.sh get-key (this is the public key which needs to be added to authorized_keys file for the root user on every worker node)
-  - exec into the container and change node* and device accordingly in /etc/heketi/topology.json
-    - sed -i 's/node1/10.100.1.14/g' topology.json
-    - sed -i 's/node2/10.100.1.120/g' topology.json
-    - sed -i 's/\\/dev\\/vdb/\\/dev\\/xvdf/g' topology.json
-  - load the topology file: heketi-cli topology load --json=/etc/heketi/topology.json.
-  - After this is done execute heketi-cli cluster list and note down the cluster id
+  - execute /root/post-install/deploy.sh heketi-cluster NODE1-PRIVATE-IP NODE2-PRIVATE-IP (This will bootstrap the cluster, note the cluster ID displayed)
 6. Modify the file /root/post-install/storage-class.yml 
-- change the resturl to http://MASTER-PRIVATE-IP:31000 ,cluster id and replication number 
+- change the resturl to http://MASTER-PRIVATE-IP:31000 ,cluster id and replication number(hardcoded for only 2 nodes)
 - create the storage class and then patch it to become the default storageclass for the cluster
 (kubectl patch storageclass glusterfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}')
 7. Application can be deployed now with /root/post-install/deploy.sh deploy-app
