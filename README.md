@@ -37,9 +37,9 @@ Workflow:
   - deploy heketi pod
   - after this is done run /root/post-install/deploy.sh get-key (this is the public key which needs to be added to authorized_keys file for the root user on every worker node)
   - exec into the container and change node* and device accordingly in /etc/heketi/topology.json
-    sed -i 's/node1/10.100.1.14/g' topology.json
-    sed -i 's/node2/10.100.1.120/g' topology.json
-    sed -i 's/\/dev\/vdb/\/dev\/xvdf/g' topology.json
+    - sed -i 's/node1/10.100.1.14/g' topology.json
+    - sed -i 's/node2/10.100.1.120/g' topology.json
+    - sed -i 's/\\/dev\\/vdb/\\/dev\\/xvdf/g' topology.json
   - load the topology file: heketi-cli topology load --json=/etc/heketi/topology.json.
   - After this is done execute heketi-cli cluster list and note down the cluster id
 6. Modify the file /root/post-install/storage-class.yml 
