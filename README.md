@@ -57,7 +57,7 @@ URLS (no external DNS):
 default credentials (not for dashboard of course)
 - user: admin
 - password: admin123
-Virtual host for the wordpress app: 
+- Virtual host for the wordpress app: 
 - http://endava.example.site  - (there is no DNS so it should be pointed to one of the public IPs localy)
 
 Things that needs to be done manually (for the moment)
