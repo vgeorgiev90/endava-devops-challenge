@@ -42,11 +42,14 @@ Workflow:
     sed -i 's/\/dev\/vdb/\/dev\/xvdf/g' topology.json
   - load the topology file: heketi-cli topology load --json=/etc/heketi/topology.json.
   - After this is done execute heketi-cli cluster list and note down the cluster id
-6. Modify the file /root/post-install/storage-class.yml change the resturl to http://MASTER-PRIVATE-IP:31000 ,cluster id and replication number create the storage class and then patch it to become the default storageclass for the cluster
+6. Modify the file /root/post-install/storage-class.yml 
+- change the resturl to http://MASTER-PRIVATE-IP:31000 ,cluster id and replication number 
+- create the storage class and then patch it to become the default storageclass for the cluster
 (kubectl patch storageclass glusterfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}')
 7. Application can be deployed now with /root/post-install/deploy.sh deploy-app
+
 Optional:
-Change the ingress node port service ports to be http - 80, https - 443 instead of random high number ports
+- Change the ingress node port service ports to be http - 80, https - 443 instead of random high number ports
 
 
 Notes:
