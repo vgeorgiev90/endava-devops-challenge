@@ -120,7 +120,7 @@ spec:
                 echo "#!/bin/bash" > /root/deploy.sh
                 echo "rm -rf /usr/share/nginx/html/*" >> /root/deploy.sh
                 echo "curl https://packages.sury.org/php/apt.gpg | apt-key add -" >> /root/deploy.sh
-                echo "apt-get update;apt-get install unzip wget php5.6-gd -y" >> /root/deploy.sh
+                echo "apt-get update;apt-get install unzip wget -y" >> /root/deploy.sh
                 echo "wget https://wordpress.org/latest.zip -P /usr/share/nginx/html" >> /root/deploy.sh
                 echo "unzip /usr/share/nginx/html/latest.zip -d /usr/share/nginx/html" >> /root/deploy.sh
                 echo "mv /usr/share/nginx/html/wordpress/wp-config-sample.php /usr/share/nginx/html/wordpress/wp-config.php" >> /root/deploy.sh
@@ -137,9 +137,23 @@ spec:
                 echo 'echo "include /etc/nginx/wordpress.conf;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
                 echo 'echo "include /etc/nginx/limits.conf;" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
                 echo 'echo "}" >> /etc/nginx/conf.d/website.conf' >> /root/deploy.sh
-                echo "/usr/sbin/php-fpm5.6" >> /root/deploy.sh
                 echo "/usr/sbin/nginx -s reload" >> /root/deploy.sh
                 chmod +x /root/deploy.sh
+                echo "#!/bin/bash" > /root/restart.sh
+                echo "curl https://packages.sury.org/php/apt.gpg | apt-key add - && apt-get update; apt-get install php5.6-gd -y" >> /root/restart.sh
+                echo 'echo "server {" > /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "listen 80;" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "server_name endava.example.site;" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "root   /usr/share/nginx/html/wordpress;" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "index  index.php index.html index.htm;" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "include /etc/nginx/wordpress.conf;" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "include /etc/nginx/limits.conf;" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo 'echo "}" >> /etc/nginx/conf.d/website.conf' >> /root/restart.sh
+                echo "/usr/sbin/php-fpm5.6" >> /root/restart.sh
+                echo "/usr/sbin/nginx -s reload" >> /root/restart.sh
+                chmod +x /root/restart.sh
+                /root/restart.sh
+
   volumeClaimTemplates:
   - metadata:
       name: web-data
@@ -177,5 +191,3 @@ spec:
   selector:
     matchLabels:
       app: web
-
-
