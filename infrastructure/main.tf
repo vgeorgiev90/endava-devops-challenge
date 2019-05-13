@@ -164,26 +164,8 @@ resource "aws_instance" "master" {
   }
 }
 
-resource "aws_instance" "worker1" {
-  depends_on = ["aws_subnet.public"]
-  ami = "${data.aws_ami.cluster.id}"
-  instance_type = "${var.instance_type}"
-  key_name               = "${aws_key_pair.ssh_key_pair.id}"
-  vpc_security_group_ids = ["${aws_security_group.cluster_sg.id}", "${aws_security_group.public_sg.id}"]
-  subnet_id              = "${aws_subnet.public.id}"
-  associate_public_ip_address = true
-  user_data_base64 = "${base64encode(local.instance-userdata)}"
-  ebs_block_device {
-	device_name = "/dev/xvdf"
-	volume_type = "gp2"
-	volume_size = "20"
-  }
-  tags {
-    Name = "Worker1"
-  }
-}
-
-resource "aws_instance" "worker2" {
+resource "aws_instance" "worker" {
+  count = "${var.count}"
   depends_on = ["aws_subnet.public"]
   ami = "${data.aws_ami.cluster.id}"
   instance_type = "${var.instance_type}"
@@ -198,7 +180,7 @@ resource "aws_instance" "worker2" {
         volume_size = "20"
   }
   tags {
-    Name = "Worker2"
+    Name = "Worker-${count.index}"
   }
 }
 

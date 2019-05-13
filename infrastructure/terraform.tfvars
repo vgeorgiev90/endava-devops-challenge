@@ -6,3 +6,4 @@ key_name="Cluster-key"
 public_key_path="/root/.ssh/id_rsa.pub"
 instance_type="t2.medium"
 region="eu-west-1"
+count=4
