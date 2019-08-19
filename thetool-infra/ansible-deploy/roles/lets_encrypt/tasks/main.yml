@@ -1,0 +1,54 @@
+- name: Generate LetsEncrypt certificate
+  docker_container:
+    name: "cert_generator"
+    image: certbot/certbot
+    restart_policy: no
+    volumes:
+      - "/etc/thetool-{{ env }}/certs:/etc/letsencrypt"
+    ports:
+      - "80:80"
+    interactive: yes
+    tty: yes
+    command: certonly --standalone -d "{{ domain }}" -m "{{ letsencrypt_mail_address }}" --agree-tos -n --dry-run
+  ignore_errors: yes
+  tags: certs
+
+- pause: seconds=30
+  tags: certs
+
+- shell: docker stop cert_generator && docker rm cert_generator
+  ignore_errors: yes
+  tags: certs
+
+- name: Check certificates
+  shell: if [ -f "/etc/thetool-{{ env }}/certs/live/{{ domain }}/cert.pem" ];then exit 0; else exit 1;fi
+  register: check
+  tags: certs
+  ignore_errors: yes
+
+- name: Use generic certificates if letsencrypt's certbot fails
+  tags: certs
+  file:
+    path: "/etc/thetool-{{ env }}/certs/live/{{ domain }}"
+    state: directory
+    owner: root
+    group: root
+  when: check is failed
+
+- template:
+    src: ../templates/generic.crt
+    dest: "/etc/thetool-{{ env }}/certs/live/{{ domain }}/cert.pem"
+    owner: root
+    group: root
+  when: check is failed
+  tags: certs
+
+- template:
+    src: ../templates/generic.key
+    dest: "/etc/thetool-{{ env }}/certs/live/{{ domain }}/privkey.pem"
+    owner: root
+    group: root
+  when: check is failed
+  tags: certs
+
+

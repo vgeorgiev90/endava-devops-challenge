@@ -1,0 +1,11 @@
+- name: Deploy scheduler service
+  docker_container:
+    name: "{{ env }}-scheduler"
+    image: "{{ scheduler_image }}"
+    restart_policy: always
+    volumes:
+      - "/etc/thetool-{{ env }}/env:/usr/share/nginx/html/.env"
+    command: scheduler
+    recreate: yes
+    detach: yes
+

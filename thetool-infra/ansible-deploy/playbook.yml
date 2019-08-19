@@ -1,0 +1,49 @@
+---
+#### Prerequesites that must be ran on all hosts ####
+- hosts: all
+  connection: ssh
+  user: root
+  gather_facts: no
+  tags: prereqs
+  roles:
+  - prerequesites
+
+#### Support services (mysql, redis) , if you do not want them deployed just comment out this section ####
+- hosts: support
+  connection: ssh
+  user: root
+  gather_facts: no
+  tags: support
+  roles:
+  - deploy_support
+
+##### Webapp service #####
+- hosts: webapp
+  connection: ssh
+  user: root
+  gather_facts: no
+  tags: webapp
+  roles:
+  - lets_encrypt
+  - deploy_webapp
+  - deploy_websocket
+
+
+#### Queue worker service #####
+- hosts: queue
+  connection: ssh
+  user: root
+  gather_facts: no
+  tags: queue
+  roles:
+  - deploy_queue
+
+#### Scheduler service ######
+- hosts: scheduler
+  connection: ssh
+  user: root
+  gather_facts: no
+  tags: scheduler
+  roles:
+  - deploy_scheduler
+

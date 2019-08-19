@@ -1,0 +1,17 @@
+[all]
+localhost
+
+[webapp]
+localhost
+
+[queue]
+localhost
+
+[scheduler]
+localhost
+
+[support]
+localhost
+
+
+

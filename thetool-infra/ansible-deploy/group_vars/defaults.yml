@@ -1,0 +1,95 @@
+---
+#### Default list of variables that will be passed to the playbook ####
+###### Registry credentials for image pull########
+
+registry_user: registry-username
+registry_pass: registry-password
+
+###### Images to deploy ##############
+
+webapp_image: fiftysaas/thetool-app:webapp-v1
+websocket_image: fiftysaas/thetool-app:daemons-v1
+scheduler_image: fiftysaas/thetool-app:daemons-v1
+queue_image: fiftysaas/thetool-app:daemons-v1
+
+###### General vars ##############
+## environment tag , all containers will be prefixed with it ##
+
+env: default
+
+## Mail address for lets encrypt certificate issueing and renewal
+letsencrypt_mail_address: someone@example.tld
+
+## Host ports for multiple envs on the same host ###
+
+app_http_port: 80
+app_https_port: 443
+mysql_host_port: 3306
+redis_host_port: 6379
+
+## Domain that will be used in nginx virtual host file , the website will be accessible on this domain ##
+
+domain: example.com
+
+####### Application settings #############
+
+app_logo: MyApp
+app_name: TheTool
+app_key: base64:eIimjpvLX7G88kPqB1WnMPxXbTbqzN4LeNo7qxHManI=
+app_url: http://12.34.56.78
+
+# debug = true or false
+debug: true 
+
+# mail settings
+mail_host: localhost
+mail_port: 25
+mail_username: null
+mail_password: null
+mail_encryption: null
+
+# pusher details (websocket)
+pusher_app_id: myappid
+pusher_app_key: myappidkey
+pusher_app_secret: myappsecret
+pusher_app_cluster: mt1
+pusher_app_scheme: http
+
+# filestack details
+filestack_key: 
+filestack_secret:
+
+# aws details for s3
+aws_key_id:
+aws_key_secret:
+aws_region:
+aws_s3_bucket:
+
+
+##### Database details ######
+
+db_host: 172.16.0.1
+db_name: app
+db_user: app
+db_pass: app123
+
+##### Redis details ########
+
+redis_host: 172.16.0.1
+
+
+##### Websocket details #######
+
+## Address on which the websocket daemon is listening (It must be publically routable, same as the app url)
+websocket_address: 12.34.56.78
+
+## Port for the websocket daemon (It must be allowed on the firewall)
+websocket_port: 6601
+
+
+####### Support services variables (mysql - if it will be deployed ) ######
+mysql_root_password: mysqlsecure123
+mysql_database: app
+mysql_user: app
+mysql_password: app123
+

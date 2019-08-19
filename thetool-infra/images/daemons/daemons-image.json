@@ -1,0 +1,52 @@
+{
+ "variables": {
+    "repository": "fiftysaas/thetool-app",
+    "tag": "daemons-v1",
+    "username": "default-user",
+    "password": "default-password",
+    "branch": "master"
+  },
+  "builders": [{
+    "type": "docker",
+    "author": "v.georgiev90@abv.bg",
+    "image": "fiftysaas/thetool-app:php7-3-base",
+    "commit": true,
+    "changes": [ "EXPOSE 80 6001", "WORKDIR /usr/share/nginx/html", "ENTRYPOINT [ \"/root/entrypoint.sh\" ]" ]
+  }],
+  "provisioners" : [
+   {
+     "type": "shell",
+     "inline": [
+	"rm -rf /usr/share/nginx/html/*",
+	"apt-get install cron vim -y",
+	"git clone --single-branch --branch {{ user `branch`}} https://{{ user `username`}}:{{ user `password`}}@bitbucket.org/50saas/thetool.git /usr/share/nginx/html/",
+	"cd /usr/share/nginx/html && composer install --optimize-autoloader --no-dev"
+     ]
+   },
+   {
+     "type": "file",
+     "source": "entrypoint.sh",
+     "destination": "/root/entrypoint.sh"
+   },
+   {
+     "type": "shell",
+     "inline": [
+        "chmod +x /root/entrypoint.sh"
+     ]
+   }
+  ],
+
+ "post-processors": [
+   [
+   {
+     "type": "docker-tag",
+     "repository": "{{user `repository`}}",
+     "tag": "{{ user `tag` }}"
+   },
+   {
+     "type": "docker-push"
+   }
+   ]
+  ]
+}
+

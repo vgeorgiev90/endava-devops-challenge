@@ -1,0 +1,55 @@
+- name: Install pip python package manger
+  tags: init
+  apt:
+    name: python-pip
+    state: present
+    update_cache: yes
+- apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+  tags: init
+
+- name: Check and install python docker module
+  shell: pip install docker-py
+  tags: init
+- shell: pip3 install docker-py
+  tags: init
+
+- name: Add docker repository and install docker-ce latest 
+  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  tags: init
+- shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  tags: init
+- apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+  tags: init
+
+- name: Start and enable docker service
+  tags: init
+  service:
+    name: docker
+    state: restarted
+    enabled: yes
+
+- name: Create directory to hold our environment file
+  file:
+    path: "/etc/thetool-{{ env }}"
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+
+- name: Provision environment file
+  template:
+    src: templates/env.j2
+    dest: "/etc/thetool-{{ env }}/env"
+    owner: root
+    group: root
+    mode: '0640'
+
+- name: Login to docker hub repo
+  shell: docker login --username={{ registry_user }} --password={{ registry_pass }}

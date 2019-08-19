@@ -1,0 +1,19 @@
+- name: Deploy webapp service
+  docker_container:
+    name: "{{ env }}-webapp"
+    image: "{{ webapp_image }}"
+    restart_policy: always
+    volumes:
+      - "/etc/thetool-{{ env }}/env:/usr/share/nginx/html/.env"
+      - "/etc/thetool-{{ env }}/certs:/etc/nginx/certs"
+    ports:
+      - "{{ app_http_port }}:80"
+      - "{{ app_https_port }}:443"
+    env:
+      DOMAIN: "{{ domain }}"
+    recreate: yes
+    detach: yes
+
+- name: Wait for webapp container to start
+  pause: seconds=60
+

@@ -1,0 +1,13 @@
+- name: Deploy Laravel websocket service
+  docker_container:
+    name: "{{ env }}-websocket"
+    image: "{{ websocket_image }}"
+    restart_policy: always
+    ports:
+      - "{{ websocket_port }}:6001"
+    volumes:
+      - "/etc/thetool-{{ env }}/env:/usr/share/nginx/html/.env"
+    command: websocket
+    recreate: yes
+    detach: yes
+

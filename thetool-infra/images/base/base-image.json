@@ -1,0 +1,46 @@
+{
+ "variables": {
+    "repository": "fiftysaas/thetool-app",
+    "tag": "php7-3-base"
+  },
+  "builders": [{
+    "type": "docker",
+    "author": "v.georgiev90@abv.bg",
+    "image": "nginx:latest",
+    "commit": true,
+    "changes": [ "EXPOSE 80", "ENTRYPOINT /usr/sbin/php-fpm7.3 && /usr/sbin/nginx -g 'daemon off;'" ]
+  }],
+  "provisioners" : [
+   {
+     "type": "shell",
+     "inline": [
+        "apt-get update; apt-get install npm git php7.3 php7.3-bcmath php7.3-bz2 php7.3-cli php7.3-common php7.3-curl php7.3-dba php7.3-dev php7.3-enchant php7.3-fpm php7.3-gd php7.3-gmp php7.3-imap php7.3-json php7.3-mbstring php7.3-mysql php7.3-odbc php7.3-opcache php7.3-phpdbg php7.3-soap php7.3-sybase php7.3-tidy php7.3-xml php7.3-xsl php7.3-xmlrpc php7.3-zip composer -y",
+	"mkdir -p /run/php",
+	"sed -i 's/www-data/nginx/g; s/listen = \\/run\\/php\\/php7.3-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php/7.3/fpm/pool.d/www.conf"
+     ]
+   },
+   {
+     "type": "file",
+     "source": "php.conf",
+     "destination": "/etc/nginx/php.conf"
+   },
+   {
+     "type": "file",
+     "source": "website.conf",
+     "destination": "/etc/nginx/conf.d/website.conf"
+   }
+  ],
+
+ "post-processors": [
+   [
+   {
+     "type": "docker-tag",
+     "repository": "{{user `repository`}}",
+     "tag": "{{ user `tag` }}"
+   },
+   {
+     "type": "docker-push"
+   }
+   ]
+  ]
+}
