@@ -1,0 +1,7 @@
+template_path: dev/vpc.yaml
+parameters:
+  CidrBlock: 192.168.0.0/16
+  PrivateSubnetCidr1: 192.168.1.0/24
+  PrivateSubnetCidr2: 192.168.2.0/24
+  PublicSubnetCidr: 192.168.3.0/24
+  ClusterName: development

@@ -1,0 +1,43 @@
+Parameters:
+  InstanceImage:
+    Type: String
+  SSHKey:
+    Type: String
+  VmType:
+    Type: String
+  VPCID:
+    Type: String
+  SubnetPublicId:
+    Type: String
+
+Resources:
+### Security group for the bastion host
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for the bastion host
+      VpcId: 
+        Ref: VPCID
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
+### Instance declaration
+  BastionHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:
+        Ref: InstanceImage
+      KeyName:
+        Ref: SSHKey
+      InstanceType:
+        Ref: VmType
+      SecurityGroupIds:
+        - Ref: BastionSecurityGroup
+      SubnetId:
+        Ref: SubnetPublicId
+      Tags:
+        - Key: Name
+          Value: Bastion-Host

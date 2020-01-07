@@ -1,0 +1,118 @@
+### Parameters
+Parameters:
+  ClusterName:
+    Type: String
+  ClusterVersion:
+    Type: String
+  SubnetPrivate1:
+    Type: String
+  SubnetPrivate2:
+    Type: String
+  VPCID:
+    Type: String
+  VpcCidr:
+    Type: String
+  WorkersDesiredCount:
+    Type: String
+  WorkersMaxCount:
+    Type: String
+  WorkerInstanceType:
+    Type: String
+  WorkerSshKey:
+    Type: String
+  WorkerDiskSize:
+    Type: String
+
+Resources:
+  ### IAM EKS Role
+  EksServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - eks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+  ### IAM EKS worker nodes role
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Path: /
+
+
+  ### Control plane security group declaration
+  EksControlPlaneSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for the EKS control plane
+      VpcId:
+        Ref: VPCID
+      SecurityGroupIngress:
+      - IpProtocol: -1
+        FromPort: 22
+        ToPort: 22
+        CidrIp:
+          Ref: VpcCidr
+
+
+  ### EKS cluster declaration
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    DependsOn: EksServiceRole
+    Properties:
+      Name: 
+        Ref: ClusterName
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - Ref: EksControlPlaneSG
+        SubnetIds:
+          - Ref: SubnetPrivate1
+          - Ref: SubnetPrivate2
+      RoleArn: !GetAtt EksServiceRole.Arn
+      Version:
+        Ref: ClusterVersion
+  
+  ### EKS worker node pool
+  EKSWorkerNodes:
+    Type: AWS::EKS::Nodegroup
+    DependsOn: EKSCluster
+    Properties:
+      ClusterName:
+        Ref: ClusterName
+      NodeRole: !GetAtt NodeInstanceRole.Arn
+      ScalingConfig:
+        MinSize: 1
+        DesiredSize:
+          Ref: WorkersDesiredCount 
+        MaxSize:
+          Ref: WorkersMaxCount
+      DiskSize:
+        Ref: WorkerDiskSize
+      InstanceTypes:
+        - Ref: WorkerInstanceType
+      RemoteAccess:
+        Ec2SshKey:
+          Ref: WorkerSshKey
+      Subnets:
+        - Ref: SubnetPrivate1
+        - Ref: SubnetPrivate2
+

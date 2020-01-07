@@ -1,0 +1,15 @@
+template_path: dev/eks.yaml
+parameters:
+  ClusterName: development
+  ClusterVersion: '1.14'
+  SubnetPrivate1: !stack_output dev/vpc.yaml::SubnetPrivate1
+  SubnetPrivate2: !stack_output dev/vpc.yaml::SubnetPrivate2
+  VPCID: !stack_output dev/vpc.yaml::VpcId
+  VpcCidr: 192.168.0.0/16
+  WorkersDesiredCount: '3'
+  WorkersMaxCount: '5'
+  WorkerInstanceType: t3.medium
+  WorkerSshKey: viktor
+  WorkerDiskSize: '50'
+
+

@@ -1,0 +1,8 @@
+template_path: dev/bastionHost.yaml
+parameters:
+  InstanceImage: ami-087855b6c8b59a9e4
+  SSHKey: viktor
+  VmType: t2.micro
+  VPCID: !stack_output dev/vpc.yaml::VpcId
+  SubnetPublicId: !stack_output dev/vpc.yaml::SubnetPublic
+

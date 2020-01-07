@@ -1,0 +1,189 @@
+## Parameters
+Parameters:
+  CidrBlock:
+    Type: String
+  PrivateSubnetCidr1:
+    Type: String
+  PrivateSubnetCidr2:
+    Type: String
+  PublicSubnetCidr:
+    Type: String
+  ClusterName:
+    Type: String
+
+### VPC declaration
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock:
+        Ref: CidrBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: !Join [ '/', [ 'kubernetes.io/cluster', !Ref ClusterName ] ]
+          Value: shared
+
+### Private Subnet 1 declaration
+  SubnetPrivate1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: PrivateSubnetCidr1
+      MapPublicIpOnLaunch: false
+      VpcId: 
+        Ref: VPC
+      Tags:
+        - Key: !Join [ '/', [ 'kubernetes.io/cluster', !Ref ClusterName ] ]
+          Value: shared
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+        
+### Private Subnet 2 declaration
+  SubnetPrivate2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: PrivateSubnetCidr2
+      MapPublicIpOnLaunch: false
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: !Join [ '/', [ 'kubernetes.io/cluster', !Ref ClusterName ] ]
+          Value: shared
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+
+### Public Subnet declaration
+  SubnetPublic:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock:
+        Ref: PublicSubnetCidr
+      MapPublicIpOnLaunch: true
+      VpcId:
+        Ref: VPC
+
+### Internet Gateway declaration
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: dev-stack-IG
+
+### Elastic IP for the NAT gateway
+  NATElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+
+### NAT Gateway declaration
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATElasticIp
+        - AllocationId
+      SubnetId:
+        Ref: SubnetPublic
+
+### Private route table declaration
+  RouteTablePrivate:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+
+### Private subnet associations
+  PrivateRouteTable1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: RouteTablePrivate
+      SubnetId:
+        Ref: SubnetPrivate1
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: RouteTablePrivate
+      SubnetId:
+        Ref: SubnetPrivate2
+
+### Private subnets to nat gateway route
+  PrivateNatRoute:
+    Type: AWS::EC2::Route
+    DependsOn: NATGateway
+    Properties:
+      RouteTableId:
+        Ref: RouteTablePrivate
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway
+
+
+### Public route table declaration
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+
+### Internet gateway attachment to vpc
+  IgAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId:
+        Ref: VPC
+
+### Subnet table association
+  PublicRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: RouteTable
+      SubnetId:
+        Ref: SubnetPublic
+
+### Internet Route add to route table
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGateway
+    Properties:
+      RouteTableId:
+        Ref: RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+
+### Outputs
+Outputs:
+  VpcId:
+    Value:
+      Ref: VPC
+  SubnetPrivate1:
+    Value:
+      Ref: SubnetPrivate1
+  SubnetPrivate2:
+    Value:
+      Ref: SubnetPrivate2
+  SubnetPublic:
+    Value:
+      Ref: SubnetPublic
+
+             
+
