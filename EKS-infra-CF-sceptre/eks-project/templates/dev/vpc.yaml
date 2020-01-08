@@ -71,6 +71,9 @@ Resources:
       MapPublicIpOnLaunch: true
       VpcId:
         Ref: VPC
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: 1
 
 ### Internet Gateway declaration
   InternetGateway:

@@ -5,4 +5,5 @@ parameters:
   VmType: t2.micro
   VPCID: !stack_output dev/vpc.yaml::VpcId
   SubnetPublicId: !stack_output dev/vpc.yaml::SubnetPublic
+  SshAllowedIp: 0.0.0.0/0
 

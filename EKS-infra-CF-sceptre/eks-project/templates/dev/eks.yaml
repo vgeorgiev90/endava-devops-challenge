@@ -22,6 +22,8 @@ Parameters:
     Type: String
   WorkerDiskSize:
     Type: String
+  BastionSg:
+    Type: String
 
 Resources:
   ### IAM EKS Role
@@ -73,6 +75,19 @@ Resources:
         CidrIp:
           Ref: VpcCidr
 
+  ### Workers Remote access Security Group
+  WorkersRemoteAccessSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for workers remote access from bastion host
+      VpcId:
+        Ref: VPCID
+      SecurityGroupIngress:
+      - IpProtocol: -1
+        FromPort: 22
+        ToPort: 22
+        SourceSecurityGroupId:
+          Ref: BastionSg
 
   ### EKS cluster declaration
   EKSCluster:
@@ -112,6 +127,8 @@ Resources:
       RemoteAccess:
         Ec2SshKey:
           Ref: WorkerSshKey
+        SourceSecurityGroups:
+          - Ref: WorkersRemoteAccessSg
       Subnets:
         - Ref: SubnetPrivate1
         - Ref: SubnetPrivate2

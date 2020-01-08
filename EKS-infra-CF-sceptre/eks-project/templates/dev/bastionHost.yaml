@@ -9,6 +9,8 @@ Parameters:
     Type: String
   SubnetPublicId:
     Type: String
+  SshAllowedIp:
+    Type: String
 
 Resources:
 ### Security group for the bastion host
@@ -22,11 +24,29 @@ Resources:
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: 0.0.0.0/0
+        CidrIp:
+          Ref: SshAllowedIp
 
 ### Instance declaration
   BastionHost:
     Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          install:
+            - Setup
+        Setup:
+          commands:
+            '01_awscli_install':
+               command: !Sub |
+                 pip install awscli
+               ignoreErrors: 'true'
+            '02_kubectl_install':
+               command: !Sub |
+                 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
+                 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list && \
+                 apt update && apt install kubectl -y
+               ignoreErrors: 'true'
     Properties:
       ImageId:
         Ref: InstanceImage
@@ -38,6 +58,21 @@ Resources:
         - Ref: BastionSecurityGroup
       SubnetId:
         Ref: SubnetPublicId
+      UserData:
+        Fn::Base64:
+          !Sub |
+          #!/bin/bash -xe
+          apt update && apt install python-pip -y
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          /usr/local/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --configsets install --region ${AWS::Region}
+          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName}   --resource EC2Instance --region ${AWS::Region}
+          sudo reboot
       Tags:
         - Key: Name
           Value: Bastion-Host
+
+Outputs:
+  BastionSg:
+    Value:
+      Ref: BastionSecurityGroup
+

@@ -11,5 +11,5 @@ parameters:
   WorkerInstanceType: t3.medium
   WorkerSshKey: viktor
   WorkerDiskSize: '50'
-
+  BastionSg: !stack_output dev/bastionHost.yaml::BastionSg
 
