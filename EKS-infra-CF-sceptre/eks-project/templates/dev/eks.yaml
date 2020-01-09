@@ -8,6 +8,8 @@ Parameters:
     Type: String
   SubnetPrivate2:
     Type: String
+  SubnetPublic:
+    Type: String
   VPCID:
     Type: String
   VpcCidr:
@@ -88,6 +90,7 @@ Resources:
         SubnetIds:
           - Ref: SubnetPrivate1
           - Ref: SubnetPrivate2
+          - Ref: SubnetPublic
       RoleArn: !GetAtt EksServiceRole.Arn
       Version:
         Ref: ClusterVersion

@@ -72,6 +72,8 @@ Resources:
       VpcId:
         Ref: VPC
       Tags:
+        - Key: !Join [ '/', [ 'kubernetes.io/cluster', !Ref ClusterName ] ]
+          Value: shared
         - Key: kubernetes.io/role/elb
           Value: 1
 

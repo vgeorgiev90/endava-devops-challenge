@@ -12,4 +12,5 @@ parameters:
   WorkerSshKey: viktor
   WorkerDiskSize: '50'
   BastionSg: !stack_output dev/bastionHost.yaml::BastionSg
+  SubnetPublic: !stack_output dev/vpc.yaml::SubnetPublic
 
