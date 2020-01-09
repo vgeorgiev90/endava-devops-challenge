@@ -63,10 +63,14 @@ Resources:
           !Sub |
           #!/bin/bash -xe
           apt update && apt install python-pip -y
-          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-          /usr/local/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --configsets install --region ${AWS::Region}
-          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName}   --resource EC2Instance --region ${AWS::Region}
-          sudo reboot
+          #pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          #/usr/local/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --configsets install --region ${AWS::Region}
+          #/usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName}   --resource EC2Instance --region ${AWS::Region}
+          #sudo reboot
+          pip install awscli
+          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+          echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+          apt update && apt install kubectl -y
       Tags:
         - Key: Name
           Value: Bastion-Host
