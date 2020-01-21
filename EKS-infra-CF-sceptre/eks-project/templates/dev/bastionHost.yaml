@@ -5,27 +5,19 @@ Parameters:
     Type: String
   VmType:
     Type: String
-  VPCID:
-    Type: String
   SubnetPublicId:
     Type: String
-  SshAllowedIp:
+  ClusterName:
+    Type: String
+  awsConfig:
+    Type: String
+  awsCredentials:
+    Type: String
+  BastionSecurityGroup:
     Type: String
 
+
 Resources:
-### Security group for the bastion host
-  BastionSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security group for the bastion host
-      VpcId: 
-        Ref: VPCID
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp:
-          Ref: SshAllowedIp
 
 ### Instance declaration
   BastionHost:
@@ -36,17 +28,40 @@ Resources:
           install:
             - Setup
         Setup:
+          files:
+            /root/.aws/config:
+              content:
+                Ref: awsConfig
+              owner: root
+              group: root
+              mode: '0644'
+            /root/.aws/credentials:
+              content:
+                Ref: awsCredentials
+              owner: root
+              group: root
+              mode: '0644'
           commands:
-            '01_awscli_install':
-               command: !Sub |
-                 pip install awscli
-               ignoreErrors: 'true'
-            '02_kubectl_install':
+            '01_get_awscli':
+               command: pip install awscli
+               ignoreErrors: true
+            '02_get_kubectl':
                command: !Sub |
                  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
                  echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list && \
                  apt update && apt install kubectl -y
-               ignoreErrors: 'true'
+               ignoreErrors: true
+            '03_config_kubectl':
+               command: !Sub |
+                 aws eks --region ${AWS::Region} update-kubeconfig --name $CLUSTER
+               env:
+                 CLUSTER:
+                   Ref: ClusterName
+               ignoreErrors: true
+            '04_check_config':
+               command: !Sub |
+                 kubectl version --client > /root/nodes.txt
+               ignoreErrors: true
     Properties:
       ImageId:
         Ref: InstanceImage
@@ -63,20 +78,11 @@ Resources:
           !Sub |
           #!/bin/bash -xe
           apt update && apt install python-pip -y
-          #pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-          #/usr/local/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --configsets install --region ${AWS::Region}
-          #/usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName}   --resource EC2Instance --region ${AWS::Region}
-          #sudo reboot
-          pip install awscli
-          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-          echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-          apt update && apt install kubectl -y
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          /usr/local/bin/cfn-init -v --stack ${AWS::StackName} --resource BastionHost --configsets install --region ${AWS::Region}
+          /usr/local/bin/cfn-signal -e $? --stack ${AWS::StackName}   --resource BastionHost --region ${AWS::Region}
       Tags:
         - Key: Name
           Value: Bastion-Host
 
-Outputs:
-  BastionSg:
-    Value:
-      Ref: BastionSecurityGroup
 

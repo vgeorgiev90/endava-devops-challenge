@@ -1,9 +1,12 @@
 template_path: dev/bastionHost.yaml
+dependencies:
+  - dev/eks.yaml
 parameters:
   InstanceImage: ami-087855b6c8b59a9e4
-  SSHKey: viktor
+  SSHKey: OTF-Viktor-Georgiev
   VmType: t2.micro
-  VPCID: !stack_output dev/vpc.yaml::VpcId
   SubnetPublicId: !stack_output dev/vpc.yaml::SubnetPublic
-  SshAllowedIp: 0.0.0.0/0
-
+  BastionSecurityGroup: !stack_output dev/vpc.yaml::BastionSecurityGroup
+  ClusterName: development
+  awsConfig: !file_contents /root/.aws/config
+  awsCredentials: !file_contents /root/.aws/credentials

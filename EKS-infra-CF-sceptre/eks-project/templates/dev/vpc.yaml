@@ -10,6 +10,8 @@ Parameters:
     Type: String
   ClusterName:
     Type: String
+  SshAllowedIp:
+    Type: String
 
 ### VPC declaration
 Resources:
@@ -175,6 +177,20 @@ Resources:
       GatewayId:
         Ref: InternetGateway
 
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for the bastion host
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp:
+          Ref: SshAllowedIp
+
+
 ### Outputs
 Outputs:
   VpcId:
@@ -189,6 +205,8 @@ Outputs:
   SubnetPublic:
     Value:
       Ref: SubnetPublic
-
+  BastionSecurityGroup:
+    Value:
+      Ref: BastionSecurityGroup
              
 
