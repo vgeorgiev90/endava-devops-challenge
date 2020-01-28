@@ -1,3 +1,27 @@
 project_code: testing-project
 region: eu-west-3
 
+
+## VPC
+vpc_cidr: 192.168.0.0/16
+private_subnet1_cidr: 192.168.1.0/24
+private_subnet2_cidr: 192.168.2.0/24
+public_subnet_cidr: 192.168.3.0/24
+ssh_allowed_ip: 0.0.0.0/0
+
+## EKS
+cluster_name: development
+cluster_version: '1.14'
+workers_desired_count: '3'
+workers_max_count: '5'
+worker_instance_type: t2.medium
+worker_disk_size: '50'
+
+## Bastion host
+ssh_key_name: OTF-Viktor-Georgiev
+bastion_instance_type: t2.micro
+bastion_image_id: ami-087855b6c8b59a9e4 ## Ubuntu 18
+
+## Monitoring stack config
+monitoringConfig: !file_contents monitoringConfig
+

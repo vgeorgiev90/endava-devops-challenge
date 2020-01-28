@@ -1,8 +1,8 @@
 template_path: dev/vpc.yaml
 parameters:
-  CidrBlock: 192.168.0.0/16
-  PrivateSubnetCidr1: 192.168.1.0/24
-  PrivateSubnetCidr2: 192.168.2.0/24
-  PublicSubnetCidr: 192.168.3.0/24
-  ClusterName: development
-  SshAllowedIp: 0.0.0.0/0
+  CidrBlock: "{{ stack_group_config.vpc_cidr }}"
+  PrivateSubnetCidr1: "{{ stack_group_config.private_subnet1_cidr }}"
+  PrivateSubnetCidr2: "{{ stack_group_config.private_subnet2_cidr }}"
+  PublicSubnetCidr: "{{ stack_group_config.public_subnet_cidr }}"
+  ClusterName: "{{ stack_group_config.cluster_name }}"
+  SshAllowedIp: "{{ stack_group_config.ssh_allowed_ip }}"

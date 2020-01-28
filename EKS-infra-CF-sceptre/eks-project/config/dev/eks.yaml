@@ -1,16 +1,16 @@
 template_path: dev/eks.yaml
 parameters:
-  ClusterName: development
-  ClusterVersion: '1.14'
+  ClusterName: "{{ stack_group_config.cluster_name }}"
+  ClusterVersion: "{{ stack_group_config.cluster_version }}"
   SubnetPrivate1: !stack_output dev/vpc.yaml::SubnetPrivate1
   SubnetPrivate2: !stack_output dev/vpc.yaml::SubnetPrivate2
   VPCID: !stack_output dev/vpc.yaml::VpcId
-  VpcCidr: 192.168.0.0/16
-  WorkersDesiredCount: '3'
-  WorkersMaxCount: '5'
-  WorkerInstanceType: t3.medium
-  WorkerSshKey: viktor
-  WorkerDiskSize: '50'
+  VpcCidr: "{{ stack_group_config.vpc_cidr }}"
+  WorkersDesiredCount: "{{ stack_group_config.workers_desired_count }}"
+  WorkersMaxCount: "{{ stack_group_config.workers_max_count }}"
+  WorkerInstanceType: "{{ stack_group_config.worker_instance_type }}"
+  WorkerSshKey: "{{ stack_group_config.ssh_key_name }}"
+  WorkerDiskSize: "{{ stack_group_config.worker_disk_size }}"
   BastionSg: !stack_output dev/vpc.yaml::BastionSecurityGroup
   SubnetPublic: !stack_output dev/vpc.yaml::SubnetPublic
 

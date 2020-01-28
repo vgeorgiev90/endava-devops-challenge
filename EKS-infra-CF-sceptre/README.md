@@ -6,6 +6,7 @@
 - EKS control plane
 - Worker node group
 - Security groups for bastion and EKS
+- Monitoring with tick stack is included ( deployed with helm from chart https://github.com/vgeorgiev90/Containers/kubernetes/helm/my-charts/tick-stack )
 
 Dependencies:
 sceptre

@@ -15,7 +15,9 @@ Parameters:
     Type: String
   BastionSecurityGroup:
     Type: String
-
+## Monitoring stack variables
+  monitoringConfig:
+    Type: String
 
 Resources:
 
@@ -29,21 +31,30 @@ Resources:
             - Setup
         Setup:
           files:
+            /root/values.yaml:
+              content:
+                Ref: monitoringConfig
+              owner: root
+              group: root
+              mode: '000640'
             /root/.aws/config:
               content:
                 Ref: awsConfig
               owner: root
               group: root
-              mode: '0644'
+              mode: '000640'
             /root/.aws/credentials:
               content:
                 Ref: awsCredentials
               owner: root
               group: root
-              mode: '0644'
+              mode: '000640'
           commands:
             '01_get_awscli':
-               command: pip install awscli
+               command: !Sub |
+                 pip install awscli && \
+                 curl -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator && \
+                 chmod +x /usr/local/bin/aws-iam-authenticator
                ignoreErrors: true
             '02_get_kubectl':
                command: !Sub |
@@ -58,9 +69,22 @@ Resources:
                  CLUSTER:
                    Ref: ClusterName
                ignoreErrors: true
-            '04_check_config':
+            '04_install_helm':
                command: !Sub |
-                 kubectl version --client > /root/nodes.txt
+                 wget https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz && \
+                 tar -xzf helm-v3.0.2-linux-amd64.tar.gz --strip-components=1 -C /usr/local/bin
+               ignoreErrors: true
+            '05_get_tick_stack_chart':
+               command: !Sub |
+                 git clone https://github.com/vgeorgiev90/Containers.git
+               ignoreErrors: true
+            '06_install_tick_stack':
+               command: !Sub |
+                 export AWS_SHARED_CREDENTIALS_FILE=/root/.aws/credentials && \
+                 export AWS_CONFIG_FILE=/root/.aws/config && \
+                 export KUBECONFIG=/root/.kube/config && \
+                 helm install tick /Containers/kubernetes/helm/my-charts/tick-stack -f /root/values.yaml --kubeconfig /root/.kube/config
+               cwd: /root
                ignoreErrors: true
     Properties:
       ImageId:
