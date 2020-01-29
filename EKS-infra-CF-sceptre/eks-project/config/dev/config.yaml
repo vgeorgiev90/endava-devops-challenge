@@ -1,6 +1,9 @@
 project_code: testing-project
 region: eu-west-3
 
+TeamName: OTF
+Environment: development
+
 
 ## VPC
 vpc_cidr: 192.168.0.0/16
@@ -23,5 +26,15 @@ bastion_instance_type: t2.micro
 bastion_image_id: ami-087855b6c8b59a9e4 ## Ubuntu 18
 
 ## Monitoring stack config
-monitoringConfig: !file_contents monitoringConfig
+GrafanaUser: admin
+GrafanaPassword: viktor123
+GrafanaKey: 483880e5e453483880e5e453
+InfluxUser: admin
+InfluxPassword: viktor123
+InfluxDb: telegraf
+OpsgenieApiKey: 483880e5e453483880e5e453
+OpsgenieUrl: https://api.eu.opsgenie.com/v2/alerts
+OpsgenieEnabled: "false"
+TelegrafUser: telegraf
+TelegrafPassword: telegraf123
 

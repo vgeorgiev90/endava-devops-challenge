@@ -11,5 +11,17 @@ parameters:
   awsConfig: !file_contents /root/.aws/config
   awsCredentials: !file_contents /root/.aws/credentials
   ### monitoring stack config
-  monitoringConfig: !file_contents /root/values.yaml
+  GrafanaUser: "{{ stack_group_config.GrafanaUser }}"
+  GrafanaPassword: "{{ stack_group_config.GrafanaPassword }}"
+  GrafanaKey: "{{ stack_group_config.GrafanaKey }}"
+  InfluxUser: "{{ stack_group_config.InfluxUser }}"
+  InfluxPassword: "{{ stack_group_config.InfluxPassword }}"
+  InfluxDb: "{{ stack_group_config.InfluxDb }}"
+  OpsgenieApiKey: "{{ stack_group_config.OpsgenieApiKey }}"
+  OpsgenieUrl: "{{ stack_group_config.OpsgenieUrl }}"
+  OpsgenieEnabled: "{{ stack_group_config.OpsgenieEnabled }}"
+  TelegrafUser: "{{ stack_group_config.TelegrafUser }}"
+  TelegrafPassword: "{{ stack_group_config.TelegrafPassword }}"
+  TeamName: "{{ stack_group_config.TeamName }}"
+  Environment: "{{ stack_group_config.Environment }}"
 

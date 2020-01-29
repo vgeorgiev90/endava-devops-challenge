@@ -16,7 +16,31 @@ Parameters:
   BastionSecurityGroup:
     Type: String
 ## Monitoring stack variables
-  monitoringConfig:
+  GrafanaUser:
+    Type: String
+  GrafanaPassword:
+    Type: String
+  GrafanaKey:
+    Type: String
+  InfluxUser:
+    Type: String
+  InfluxPassword:
+    Type: String
+  InfluxDb:
+    Type: String
+  OpsgenieApiKey:
+    Type: String
+  OpsgenieUrl:
+    Type: String
+  OpsgenieEnabled:
+    Type: String
+  TelegrafUser:
+    Type: String
+  TelegrafPassword:
+    Type: String
+  TeamName:
+    Type: String
+  Environment:
     Type: String
 
 Resources:
@@ -32,11 +56,43 @@ Resources:
         Setup:
           files:
             /root/values.yaml:
-              content:
-                Ref: monitoringConfig
               owner: root
               group: root
               mode: '000640'
+              content: !Sub |
+                chronograf_resources: {}
+                fullnameOverride: ""
+                nameOverride: ""
+                team_name: ${TeamName}
+                environment: ${Environment}
+                ## namespace
+                namespace: monitoring
+                ## Grafana
+                grafana:
+                  admin_password: ${GrafanaPassword}
+                  admin_user: ${GrafanaUser}
+                  secret_key: ${GrafanaKey}
+                  service_annotations:
+                    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+                grafana_resources: {}
+                ### InfluxDB
+                influx:
+                  admin_password: ${InfluxPassword}
+                  admin_user: ${InfluxUser}
+                  database_name: ${InfluxDb}
+                influx_resources: {}
+                ### Kapacitor
+                kapacitor:
+                  opsgenie_api_key: ${OpsgenieApiKey}
+                  opsgenie_enabled: ${OpsgenieEnabled}
+                  opsgenie_url: ${OpsgenieUrl}
+                kapacitor_resources: {}
+                ## Telegraf
+                telegraf:
+                  admin_password: ${TelegrafPassword}
+                  admin_user: ${TelegrafUser}
+                telegraf_resources: {}
+
             /root/.aws/config:
               content:
                 Ref: awsConfig
@@ -83,7 +139,7 @@ Resources:
                  export AWS_SHARED_CREDENTIALS_FILE=/root/.aws/credentials && \
                  export AWS_CONFIG_FILE=/root/.aws/config && \
                  export KUBECONFIG=/root/.kube/config && \
-                 helm install tick /Containers/kubernetes/helm/my-charts/tick-stack -f /root/values.yaml --kubeconfig /root/.kube/config
+                 helm install monitoring /Containers/kubernetes/helm/my-charts/tick-stack -f /root/values.yaml --kubeconfig /root/.kube/config
                cwd: /root
                ignoreErrors: true
     Properties:
