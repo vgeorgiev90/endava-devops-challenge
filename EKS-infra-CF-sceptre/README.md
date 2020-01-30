@@ -9,6 +9,7 @@
 - Worker node group - private subnets
 - Security groups for bastion and EKS
 - Monitoring with tick stack is included ( deployed with helm from chart https://github.com/vgeorgiev90/Containers/kubernetes/helm/my-charts/tick-stack )
+- DNS records creation in route53 added for the monitoring/alerting endpoints
 
 Dependencies:
 sceptre

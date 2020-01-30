@@ -42,6 +42,9 @@ Parameters:
     Type: String
   Environment:
     Type: String
+  DnsZoneId:
+    Type: String
+
 
 Resources:
 
@@ -93,6 +96,58 @@ Resources:
                   admin_user: ${TelegrafUser}
                 telegraf_resources: {}
 
+            /root/add-route53-record.sh:
+              owner: root
+              group: root
+              mode: '000750'
+              content: |
+                #!/bin/bash
+                export PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
+                DNS_ZONE=${1}
+                DNS_NAME=$(aws route53 get-hosted-zone --id ${DNS_ZONE} | grep Name | head -1 | awk -F":" '{print $2}' | awk -F"\"" '{print $2}')
+                LB1_CHRONO_DNS=$(kubectl -n monitoring get svc | grep chronograf | awk '{print $4}')
+                LB2_GRAFANA_DNS=$(kubectl -n monitoring get svc | grep grafana | awk '{print $4}')
+                LB1_NAME=$(kubectl -n monitoring get svc | grep chronograf | awk '{print $4}' | awk -F"-" '{print $1}')
+                LB2_NAME=$(kubectl -n monitoring get svc | grep grafana | awk '{print $4}' | awk -F"-" '{print $1}')
+                LB1_HOSTED_ZONE=$(aws elb describe-load-balancers --load-balancer-name ${LB1_NAME} | grep CanonicalHostedZoneNameID | awk -F":" '{print $2}' | awk -F"\"" '{print $2}')
+                LB2_HOSTED_ZONE=$(aws elb describe-load-balancers --load-balancer-name ${LB2_NAME} | grep CanonicalHostedZoneNameID | awk -F":" '{print $2}' | awk -F"\"" '{print $2}')
+                cat > chronograf-record-set.json << EOF
+                {
+                  "Comment": "Chronograf monitoring record",
+                  "Changes": [{
+                        "Action": "CREATE",
+                        "ResourceRecordSet": {
+                            "Name": "alerts.${DNS_NAME}",
+                            "Type": "A",
+                            "AliasTarget":{
+                                    "HostedZoneId": "${LB1_HOSTED_ZONE}",
+                                    "DNSName": "dualstack.${LB1_CHRONO_DNS}",
+                                    "EvaluateTargetHealth": false
+                              }}
+                          }]
+                }
+                EOF
+                cat > grafana-record-set.json << EOF
+                {
+                  "Comment": "Grafana monitoring record",
+                  "Changes": [{
+                        "Action": "CREATE",
+                        "ResourceRecordSet": {
+                            "Name": "monitoring.${DNS_NAME}",
+                            "Type": "A",
+                            "AliasTarget":{
+                                    "HostedZoneId": "${LB2_HOSTED_ZONE}",
+                                    "DNSName": "dualstack.${LB2_GRAFANA_DNS}",
+                                    "EvaluateTargetHealth": false
+                              }}
+                          }]
+                }
+                EOF
+                echo "Creating record for alerts.${DNS_NAME}"
+                aws route53 change-resource-record-sets --hosted-zone-id ${DNS_ZONE} --change-batch file://chronograf-record-set.json
+                echo "Creating record for monitoring.${DNS_NAME}"
+                aws route53 change-resource-record-sets --hosted-zone-id ${DNS_ZONE} --change-batch file://grafana-record-set.json
+
             /root/.aws/config:
               content:
                 Ref: awsConfig
@@ -140,6 +195,17 @@ Resources:
                  export AWS_CONFIG_FILE=/root/.aws/config && \
                  export KUBECONFIG=/root/.kube/config && \
                  helm install monitoring /Containers/kubernetes/helm/my-charts/tick-stack -f /root/values.yaml --kubeconfig /root/.kube/config
+               cwd: /root
+               ignoreErrors: true
+            '07_update_route53_with_new_DNS_records':
+               command: !Sub |
+                 sleep 120 && \
+                 /root/add-route53-record.sh $DNS_ZONE_ID
+               env:
+                 AWS_SHARED_CREDENTIALS_FILE: /root/.aws/credentials
+                 AWS_CONFIG_FILE: /root/.aws/config
+                 DNS_ZONE_ID:
+                   Ref: DnsZoneId
                cwd: /root
                ignoreErrors: true
     Properties:

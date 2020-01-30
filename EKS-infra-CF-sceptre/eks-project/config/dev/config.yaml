@@ -27,6 +27,7 @@ bastion_instance_type: t2.micro
 bastion_image_id: ami-087855b6c8b59a9e4 ## Ubuntu 18
 
 ## Monitoring stack config
+DnsZoneId: Z#########  ## AWS Route53 Hosted zone ID in which records will be created
 GrafanaUser: admin
 GrafanaPassword: viktor123
 GrafanaKey: 483880e5e453483880e5e453

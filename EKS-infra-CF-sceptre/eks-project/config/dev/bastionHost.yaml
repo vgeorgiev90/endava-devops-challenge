@@ -24,4 +24,4 @@ parameters:
   TelegrafPassword: "{{ stack_group_config.TelegrafPassword }}"
   TeamName: "{{ stack_group_config.TeamName }}"
   Environment: "{{ stack_group_config.Environment }}"
-
+  DnsZoneId: "{{ stack_group_config.DnsZoneId }}"
