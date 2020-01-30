@@ -13,4 +13,5 @@ parameters:
   WorkerDiskSize: "{{ stack_group_config.worker_disk_size }}"
   BastionSg: !stack_output dev/vpc.yaml::BastionSecurityGroup
   SubnetPublic: !stack_output dev/vpc.yaml::SubnetPublic
+  SubnetPublic2: !stack_output dev/vpc.yaml::SubnetPublic2
 

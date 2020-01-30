@@ -1,4 +1,4 @@
-project_code: testing-project
+project_code: eks-project
 region: eu-west-3
 
 TeamName: OTF
@@ -10,6 +10,7 @@ vpc_cidr: 192.168.0.0/16
 private_subnet1_cidr: 192.168.1.0/24
 private_subnet2_cidr: 192.168.2.0/24
 public_subnet_cidr: 192.168.3.0/24
+public_subnet_cidr2: 192.168.4.0/24
 ssh_allowed_ip: 0.0.0.0/0
 
 ## EKS

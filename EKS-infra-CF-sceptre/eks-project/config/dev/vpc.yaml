@@ -4,5 +4,6 @@ parameters:
   PrivateSubnetCidr1: "{{ stack_group_config.private_subnet1_cidr }}"
   PrivateSubnetCidr2: "{{ stack_group_config.private_subnet2_cidr }}"
   PublicSubnetCidr: "{{ stack_group_config.public_subnet_cidr }}"
+  PublicSubnetCidr2: "{{ stack_group_config.public_subnet_cidr2 }}"
   ClusterName: "{{ stack_group_config.cluster_name }}"
   SshAllowedIp: "{{ stack_group_config.ssh_allowed_ip }}"

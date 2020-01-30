@@ -8,6 +8,8 @@ Parameters:
     Type: String
   PublicSubnetCidr:
     Type: String
+  PublicSubnetCidr2:
+    Type: String
   ClusterName:
     Type: String
   SshAllowedIp:
@@ -68,6 +70,10 @@ Resources:
   SubnetPublic:
     Type: AWS::EC2::Subnet
     Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
       CidrBlock:
         Ref: PublicSubnetCidr
       MapPublicIpOnLaunch: true
@@ -79,6 +85,26 @@ Resources:
         - Key: kubernetes.io/role/elb
           Value: 1
 
+### Public Subnet 2 declaration
+  SubnetPublic2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: PublicSubnetCidr2
+      MapPublicIpOnLaunch: true
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: !Join [ '/', [ 'kubernetes.io/cluster', !Ref ClusterName ] ]
+          Value: shared
+        - Key: kubernetes.io/role/elb
+          Value: 1
+
+
 ### Internet Gateway declaration
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -89,6 +115,11 @@ Resources:
 
 ### Elastic IP for the NAT gateway
   NATElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATElasticIp2:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
@@ -105,8 +136,25 @@ Resources:
       SubnetId:
         Ref: SubnetPublic
 
+  NATGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NATElasticIp2
+        - AllocationId
+      SubnetId:
+        Ref: SubnetPublic2
+
+
 ### Private route table declaration
   RouteTablePrivate:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+
+  RouteTablePrivate2:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:
@@ -125,7 +173,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId:
-        Ref: RouteTablePrivate
+        Ref: RouteTablePrivate2
       SubnetId:
         Ref: SubnetPrivate2
 
@@ -140,6 +188,16 @@ Resources:
       NatGatewayId:
         Ref: NATGateway
 
+  PrivateNatRoute2:
+    Type: AWS::EC2::Route
+    DependsOn: NATGateway2
+    Properties:
+      RouteTableId:
+        Ref: RouteTablePrivate2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway
+
 
 ### Public route table declaration
   RouteTable:
@@ -148,6 +206,13 @@ Resources:
       VpcId:
         Ref: VPC
 
+  RouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+
+  
 ### Internet gateway attachment to vpc
   IgAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -157,6 +222,7 @@ Resources:
       VpcId:
         Ref: VPC
 
+
 ### Subnet table association
   PublicRouteTable:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -165,6 +231,15 @@ Resources:
         Ref: RouteTable
       SubnetId:
         Ref: SubnetPublic
+
+  PublicRouteTable2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: RouteTable2
+      SubnetId:
+        Ref: SubnetPublic2
+
 
 ### Internet Route add to route table
   InternetRoute:
@@ -176,6 +251,17 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId:
         Ref: InternetGateway
+
+  InternetRoute2:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGateway
+    Properties:
+      RouteTableId:
+        Ref: RouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+
 
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -205,6 +291,9 @@ Outputs:
   SubnetPublic:
     Value:
       Ref: SubnetPublic
+  SubnetPublic2:
+    Value:
+      Ref: SubnetPublic2
   BastionSecurityGroup:
     Value:
       Ref: BastionSecurityGroup
