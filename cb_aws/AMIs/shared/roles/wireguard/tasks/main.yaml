@@ -1,0 +1,105 @@
+## Wireguard ansible plays
+- name: Copy vpn management script
+  copy:
+    src: files/wg_manage.sh
+    dest: /root/wg_manage.sh
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Install wireguard packages
+  apt:
+    name: ["wireguard", "iptables-persistent", "unbound", "unbound-host"]
+    state: present
+
+- name: Set required kernel params
+  sysctl:
+    name: "{{ item }}"
+    value: 1
+    state: present
+    reload: yes
+  with_items:
+  - net.ipv4.ip_forward
+  - net.ipv4.conf.all.forwarding
+
+- name: Ensure wireguard config directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+  - /etc/wireguard/keys/clients
+  - /etc/wireguard/client-configs
+  - /etc/wireguard/backups
+  - /etc/wireguard/keys/server
+
+- name: Disable ufw and clear iptables existing rules
+  shell: ufw disable && iptables -F && iptables -t nat -F
+
+- name: Initialize wireguard server encryption keys
+  shell: wg genkey | tee /etc/wireguard/keys/server/private_key | wg pubkey > /etc/wireguard/keys/server/public_key
+
+- name: Get Server Private Key for wireguard config
+  shell: cat /etc/wireguard/keys/server/private_key
+  register: key
+
+- set_fact:
+    server_key: "{{ key }}"
+
+- copy:
+    dest: /etc/wireguard/wg0.conf
+    content: |
+      [Interface]
+      PrivateKey = {{ server_key.stdout }}
+      Address = 10.10.10.1/24
+      ListenPort = 61443
+      SaveConfig = false
+
+- copy:
+    dest: /etc/wireguard/client-ips
+    content: |
+      ## This file is used to assign vpn IPs to clients. DO NOT Modify it.
+      10
+
+- name: Set required iptables rules
+  shell: |
+    iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    iptables -A INPUT -p udp -m udp --dport 61443 -m conntrack --ctstate NEW -j ACCEPT
+    iptables -A INPUT -s 10.10.10.0/24 -p tcp -m tcp --dport 53 -m conntrack --ctstate NEW -j ACCEPT
+    iptables -A INPUT -s 10.10.10.0/24 -p udp -m udp --dport 53 -m conntrack --ctstate NEW -j ACCEPT
+    iptables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
+    iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o eth0 -j MASQUERADE
+    systemctl enable netfilter-persistent
+    systemctl enable wg-quick@wg0
+    netfilter-persistent save
+
+- name: Configure unbound DNS server for the VPN clients
+  get_url:
+    url: https://www.internic.net/domain/named.cache
+    dest: /var/lib/unbound/root.hints
+
+- file:
+    path: /etc/unbound    
+    state: directory
+    mode: '0755'
+
+- copy:
+    src: files/unbound.conf
+    dest: /etc/unbound/unbound.conf
+    force: yes
+
+- shell: chown -R unbound:unbound /var/lib/unbound
+
+- service:
+    name: wg-quick@wg0
+    state: restarted
+    enabled: yes  
+
+- name: Start unbound service
+  service:
+    name: unbound
+    state: restarted
+    enabled: yes
+
+

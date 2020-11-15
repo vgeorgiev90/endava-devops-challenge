@@ -1,0 +1,62 @@
+- name: Install and setup ossec server
+  shell: add-apt-repository ppa:ondrej/php -y
+
+- apt:
+    update_cache: yes
+
+- apt:
+    name: ["php7.2-fpm", "php7.2-common", "nginx", "build-essential", "gcc", "make", "unzip", "sendmail", "inotify-tools", "expect", "libevent-dev", "libpcre2-dev", "libz-dev", "libssl-dev"]
+    state: present
+
+- name: clone ossec web UI
+  git:
+    repo: https://github.com/ossec/ossec-wui.git
+    dest: /usr/share/nginx/html
+    clone: yes
+
+- service:
+    name: php7.2-fpm
+    state: restarted
+    enabled: yes
+
+- copy:
+    src: files/ossec.conf
+    dest: /etc/nginx/sites-enabled/ossec.conf
+    owner: root
+    group: root
+
+- copy:
+    src: files/htpasswd
+    dest: /usr/share/nginx/html/ossec-wui/.htpasswd
+    owner: root
+    group: root
+    mode: '0644'
+
+- file:
+    path: /usr/share/nginx/html/ossec-wui/tmp
+    state: directory
+    mode: '0777'
+
+- name: Get OSSEC archive
+  get_url:
+    url: https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
+    dest: /root
+    mode: '0644'
+
+- unarchive:
+    src: /root/ossec-hids-3.6.0.tar.gz
+    dest: /root
+    remote_src: True
+
+- name: Install OSSEC agent
+  shell: mv /root/ossec-hids-3.6.0 /root/ossec
+
+- copy:
+    src: files/preloaded-vars.conf
+    dest: /root/ossec/etc/preloaded-vars.conf
+    owner: root
+    group: root
+
+- shell: /root/ossec/install.sh
+
+- shell: /var/ossec/bin/ossec-control start

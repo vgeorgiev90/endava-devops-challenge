@@ -1,0 +1,3 @@
+#!/bin/sh
+
+lynis audit system > /var/log/lynis/$(date "+%Y-%m-%d")-audit.log

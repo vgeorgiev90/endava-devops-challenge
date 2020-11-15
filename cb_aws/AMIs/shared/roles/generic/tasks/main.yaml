@@ -1,0 +1,85 @@
+- apt:
+    name: apt-transport-https
+    state: present
+
+- name: Install lynis and rkhunter
+  shell: wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | apt-key add -
+
+- shell: |
+    echo 'Acquire::Languages "none";' | sudo tee /etc/apt/apt.conf.d/99disable-translations 
+    echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" > /etc/apt/sources.list.d/cisofy-lynis.list
+
+- apt:
+    name: [ "fail2ban", "lynis", "rkhunter" ]
+    state: present
+
+- service:
+    name: fail2ban
+    state: restarted
+    enabled: yes
+
+- copy:
+    src: files/rkhunter.conf
+    dest: /etc/rkhunter.conf
+    owner: root
+    group: root
+
+- copy:
+    src: files/rkhunter
+    dest: /etc/default/rkhunter
+    owner: root
+    group: root
+
+- copy:
+    src: files/lynis
+    dest: /etc/cron.weekly/lynis
+    owner: root
+    group: root
+    mode: '0755'
+
+- file:
+    path: /var/log/lynis
+    state: directory
+
+- shell: chmod +x /etc/cron.weekly/lynis
+
+- name: Enable unattended updates
+  apt: 
+    name: [ "unattended-upgrades", "apt-listchanges" ]
+    state: present
+
+- copy:
+    src: files/50unattended-upgrades
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: '0644'
+
+- copy:
+    src: files/20auto-upgrades
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Adding some users: viktor, koos, moises
+  user:
+    name: "{{ item }}"
+    groups: sudo
+    create_home: yes
+    shell: /bin/bash
+  with_items:
+  - viktor
+  - moises
+  - koos
+
+- name: Adding public keys
+  authorized_key:
+    user: "{{ items.user }}"
+    state: present
+    key: "{{ items.key }}"
+  with_items:
+  - { user: "viktor", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFn2HrNRTwGwPqHTM0C3euOf0QUxf9mMOrDqAGOE1gBGkpuLCplWTbq/bzrCxDB3jTuu3EQC7aKzmBtAmK2dJHwWPQEQGmtpTBpONklYJXLEK5NKLFfpwetcrKqd82OozLb8BAF5a5PE6k2QIV+A+8Z/rQWNAif1NTwS/e44rsIkl7BDqxEjkXD36Wo2jBbkGmlfv1hAPHrjq2KHSu1N5nXgS/KviPj2gBezQdXD1Q/W7LXHcCj6R/jm2cAAPmbztsinpJdvb4O2/fr/NQ13FansnWVmyKBR95T/ahnqEq1nkQpPzXycLHnIAMiS6RKUdrgjgyogkNQ0REe0yRBBNN vgeorgiev@EN719130"}
+  - { user: "koos", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCrjAqyK35VCgXQKnpYWONb6UfJgDfUb62t9Jn0x+I4B16p8fubUYSR5liFccpXnjDzjACKn9oYuKV3tZ58kDI+k4vKUZ6vlblpQ6fHVvM5UTZLh3gvE12QzeUxWngorKp9b9U6eAQj90gEcJtlP1DDyXPqFM39RhmfY7tTAhn69R5Hif+7sc8YDssskikvLPYvqwgM5/QXQJa+t2FgudBVkMnSeGRIFYcs4L1rabhgP7b1zTNHZjrqaXTxjmOCVrXEJ+WasaD9jMQ7zrtBtJDajHjSJb2J+Mn/BQwNHO4I8NuAOmP14z2jzSbmaFrORksZRNyF7ZKhJxjGnXkBPqt kozy@mpb"}
+  - { user: "moises", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDM9cgGHfyHkOFmBZZKSCIAl0Zaq//Rxc6euDbrtrIHuoco9MeMsFr2aggBrqahtP8ybiUdl2VWNX5u17xK+SFRfrM8JjLBcJx5zLwWNJc0B/Bz37YILAeikJH8Yo5q62V95o/dE+bFEaufBN5p3uFHe03sXmKLDNpaWPclOK5RXKx5bCW2RDpOEjO8Y1zQ8UChY30hjCP6FxzKowvoi5/meU9kHjemCcYYfeQnJrFTzQ6BS9+HDtFf9wv7YKz50eHg8RcJXIMvMIX7gvYGTYrc/29WSiWlFLXurLhwCh2JIZmudsfMZJhozB95Hx8BfP5/5X2fxKtNXijjRYVXQuvl moises@cobrowser.net"}
+

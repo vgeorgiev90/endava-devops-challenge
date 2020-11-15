@@ -1,0 +1,21 @@
+- name: Get OSSEC archive
+  get_url:
+    url: https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
+    dest: /root
+    mode: '0644'
+
+- unarchive:
+    src: /root/ossec-hids-3.6.0.tar.gz
+    dest: /root
+    remote_src: True
+
+- name: Install OSSEC agent
+  shell: mv /root/ossec-hids-3.6.0 /root/ossec
+
+- copy:
+    src: files/preloaded-vars.conf
+    dest: /root/ossec/etc/preloaded-vars.conf
+    owner: root
+    group: root
+
+- shell: /root/ossec/install.sh
