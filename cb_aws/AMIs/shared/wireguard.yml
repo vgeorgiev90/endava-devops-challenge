@@ -1,10 +1,10 @@
 - hosts: all
   become: yes
   roles:
+  - generic
+  - sd_monitoring
+  - ossec_agent
+  - wireguard
   - os_hardening
   - ssh_hardening
-  - wireguard
-  - sd_monitoring
-  - generic
-  - ossec_agent
 

@@ -1,4 +1,7 @@
 - apt:
+    update_cache: yes
+
+- apt:
     name: apt-transport-https
     state: present
 
@@ -82,4 +85,5 @@
   - { user: "viktor", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFn2HrNRTwGwPqHTM0C3euOf0QUxf9mMOrDqAGOE1gBGkpuLCplWTbq/bzrCxDB3jTuu3EQC7aKzmBtAmK2dJHwWPQEQGmtpTBpONklYJXLEK5NKLFfpwetcrKqd82OozLb8BAF5a5PE6k2QIV+A+8Z/rQWNAif1NTwS/e44rsIkl7BDqxEjkXD36Wo2jBbkGmlfv1hAPHrjq2KHSu1N5nXgS/KviPj2gBezQdXD1Q/W7LXHcCj6R/jm2cAAPmbztsinpJdvb4O2/fr/NQ13FansnWVmyKBR95T/ahnqEq1nkQpPzXycLHnIAMiS6RKUdrgjgyogkNQ0REe0yRBBNN"}
   - { user: "koos", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCrjAqyK35VCgXQKnpYWONb6UfJgDfUb62t9Jn0x+I4B16p8fubUYSR5liFccpXnjDzjACKn9oYuKV3tZ58kDI+k4vKUZ6vlblpQ6fHVvM5UTZLh3gvE12QzeUxWngorKp9b9U6eAQj90gEcJtlP1DDyXPqFM39RhmfY7tTAhn69R5Hif+7sc8YDssskikvLPYvqwgM5/QXQJa+t2FgudBVkMnSeGRIFYcs4L1rabhgP7b1zTNHZjrqaXTxjmOCVrXEJ+WasaD9jMQ7zrtBtJDajHjSJb2J+Mn/BQwNHO4I8NuAOmP14z2jzSbmaFrORksZRNyF7ZKhJxjGnXkBPqt"}
   - { user: "moises", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDM9cgGHfyHkOFmBZZKSCIAl0Zaq//Rxc6euDbrtrIHuoco9MeMsFr2aggBrqahtP8ybiUdl2VWNX5u17xK+SFRfrM8JjLBcJx5zLwWNJc0B/Bz37YILAeikJH8Yo5q62V95o/dE+bFEaufBN5p3uFHe03sXmKLDNpaWPclOK5RXKx5bCW2RDpOEjO8Y1zQ8UChY30hjCP6FxzKowvoi5/meU9kHjemCcYYfeQnJrFTzQ6BS9+HDtFf9wv7YKz50eHg8RcJXIMvMIX7gvYGTYrc/29WSiWlFLXurLhwCh2JIZmudsfMZJhozB95Hx8BfP5/5X2fxKtNXijjRYVXQuvl"}
+
 
