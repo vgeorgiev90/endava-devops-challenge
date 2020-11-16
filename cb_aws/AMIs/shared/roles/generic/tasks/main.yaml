@@ -75,9 +75,9 @@
 
 - name: Adding public keys
   authorized_key:
-    user: "{{ items.user }}"
+    user: "{{ item.user }}"
     state: present
-    key: "{{ items.key }}"
+    key: "{{ item.key }}"
   with_items:
   - { user: "viktor", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFn2HrNRTwGwPqHTM0C3euOf0QUxf9mMOrDqAGOE1gBGkpuLCplWTbq/bzrCxDB3jTuu3EQC7aKzmBtAmK2dJHwWPQEQGmtpTBpONklYJXLEK5NKLFfpwetcrKqd82OozLb8BAF5a5PE6k2QIV+A+8Z/rQWNAif1NTwS/e44rsIkl7BDqxEjkXD36Wo2jBbkGmlfv1hAPHrjq2KHSu1N5nXgS/KviPj2gBezQdXD1Q/W7LXHcCj6R/jm2cAAPmbztsinpJdvb4O2/fr/NQ13FansnWVmyKBR95T/ahnqEq1nkQpPzXycLHnIAMiS6RKUdrgjgyogkNQ0REe0yRBBNN"}
   - { user: "koos", key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCrjAqyK35VCgXQKnpYWONb6UfJgDfUb62t9Jn0x+I4B16p8fubUYSR5liFccpXnjDzjACKn9oYuKV3tZ58kDI+k4vKUZ6vlblpQ6fHVvM5UTZLh3gvE12QzeUxWngorKp9b9U6eAQj90gEcJtlP1DDyXPqFM39RhmfY7tTAhn69R5Hif+7sc8YDssskikvLPYvqwgM5/QXQJa+t2FgudBVkMnSeGRIFYcs4L1rabhgP7b1zTNHZjrqaXTxjmOCVrXEJ+WasaD9jMQ7zrtBtJDajHjSJb2J+Mn/BQwNHO4I8NuAOmP14z2jzSbmaFrORksZRNyF7ZKhJxjGnXkBPqt"}
