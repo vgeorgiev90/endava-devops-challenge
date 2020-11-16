@@ -1,3 +1,8 @@
+- name: Install build deps
+  apt:
+    name: ["gcc", "make", "libevent-dev", "libpcre2-dev", "libz-dev", "libssl-dev"]
+    state: present
+    
 - name: Get OSSEC archive
   get_url:
     url: https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
