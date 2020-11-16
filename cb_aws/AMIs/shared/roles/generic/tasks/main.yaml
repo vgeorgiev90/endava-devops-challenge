@@ -62,7 +62,7 @@
     group: root
     mode: '0644'
 
-- name: Adding some users: viktor, koos, moises
+- name: Adding some users - viktor, koos, moises
   user:
     name: "{{ item }}"
     groups: sudo
