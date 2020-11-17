@@ -13,13 +13,19 @@
     echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" > /etc/apt/sources.list.d/cisofy-lynis.list
 
 - apt:
-    name: [ "fail2ban", "lynis", "rkhunter" ]
+    name: [ "lynis", "rkhunter" ]
     state: present
 
+- apt:
+    name: fail2ban
+    state: present
+  ignore_errors: true
+    
 - service:
     name: fail2ban
     state: restarted
     enabled: yes
+  ignore_errors: true
 
 - copy:
     src: files/rkhunter.conf
