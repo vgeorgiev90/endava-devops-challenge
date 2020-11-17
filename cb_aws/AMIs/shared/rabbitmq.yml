@@ -1,0 +1,10 @@
+- hosts: all
+  become: yes
+  roles:
+  - generic
+  - sd_monitoring
+  - ossec_agent
+  - geerlingguy.rabbitmq
+  - os_hardening
+  - ssh_hardening
+
