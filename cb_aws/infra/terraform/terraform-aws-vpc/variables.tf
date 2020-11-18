@@ -16,3 +16,7 @@ variable "rmq_subnet_cidrs" {
   type = "list"
 }
 
+variable "es_subnet_cidrs" {
+  type = "list"
+}
+
