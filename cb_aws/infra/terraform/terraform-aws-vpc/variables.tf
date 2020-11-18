@@ -20,3 +20,7 @@ variable "es_subnet_cidrs" {
   type = "list"
 }
 
+variable "region" {
+  type = "string"
+  default = "eu-west-1"
+}
