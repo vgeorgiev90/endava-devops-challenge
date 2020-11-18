@@ -15,7 +15,7 @@ resource "aws_vpc" "cb_vpc" {
   enable_dns_support = true
   enable_dns_hostnames = true
 
-  tags {
+  tags = {
     Name = "Staging VPC"
   }
 }
@@ -28,7 +28,7 @@ resource "aws_subnet" "public" {
   cidr_block = "${var.public_subnet_cidrs[count.index]}"
   availability_zone = "${data.aws_availability_zones.available_zones.names[count.index]}" 
 
-  tags {
+  tags = {
     Name = "Staging public subnet"
   }
 }
@@ -42,7 +42,7 @@ resource "aws_subnet" "private" {
   cidr_block = "${var.private_subnet_cidrs[count.index]}"
   availability_zone = "${data.aws_availability_zones.available_zones.names[count.index]}"
 
-  tags {
+  tags = {
     Name = "Staging private subnet"
   }
 }
@@ -55,7 +55,7 @@ resource "aws_subnet" "db_private" {
   cidr_block = "${var.db_subnet_cidrs[count.index]}"
   availability_zone = "${data.aws_availability_zones.available_zones.names[count.index]}"
 
-  tags {
+  tags = {
     Name = "database subnet"
   }
 }
@@ -66,7 +66,7 @@ resource "aws_subnet" "elastic_private" {
   cidr_block = "${var.es_subnet_cidrs[count.index]}"
   availability_zone = "${data.aws_availability_zones.available_zones.names[count.index]}"
 
-  tags {
+  tags = {
     Name = "elastic subnet"
   }
 }
@@ -77,7 +77,7 @@ resource "aws_subnet" "rmq_private" {
   cidr_block = "${var.rmq_subnet_cidrs[count.index]}"
   availability_zone = "${data.aws_availability_zones.available_zones.names[count.index]}"
 
-  tags {
+  tags = {
     Name = "RMQ subnet"
   }
 }
@@ -97,7 +97,7 @@ resource "aws_route_table" "public" {
     gateway_id = "${aws_internet_gateway.cb_gw.id}"
   }
 
-  tags {
+  tags = {
     Name = "Public route table"
   }
 }
@@ -111,7 +111,7 @@ resource "aws_route_table_association" "public_association" {
 resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.cb_vpc.id}"
 
-  tags {
+  tags = {
     Name = "Private route table"
   }
 }
