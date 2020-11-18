@@ -87,6 +87,23 @@ resource "aws_internet_gateway" "cb_gw" {
   vpc_id = aws_vpc.cb_vpc.id
 }
 
+################### Elastic Ip for nat gateway ###########
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
+################### Nat gateway ###########################
+
+resource "aws_nat_gateway" "nat_gw" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public.1.id
+  depends_on = [aws_internet_gateway.cb_gw]
+
+  tags = {
+    Name = "NAT_private_subnets"
+  }
+}
+
 ################ Route table definitions ####################
 
 resource "aws_route_table" "public" {
@@ -103,14 +120,18 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public_association" {
-  #count          = "${aws_subnet.public.count}"
-  count = 3
+  count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public.*.id[count.index]
   route_table_id = aws_route_table.public.id
 }
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.cb_vpc.id
+ 
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gw.id  
+  }
 
   tags = {
     Name = "Private route table"
