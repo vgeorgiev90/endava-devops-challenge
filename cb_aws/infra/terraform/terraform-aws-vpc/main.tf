@@ -1,3 +1,7 @@
+provider "aws" {
+  region = var.region
+}
+
 ## Declare the VPC resources
 
 #################### Get availability zones ##########
