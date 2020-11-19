@@ -14,9 +14,12 @@ output "rmq_private_subnet" {
   value = aws_subnet.rmq_private.*.id
 }
 
-
 output "public" {
   value = aws_subnet.public.*.id
+}
+
+output "es_private_subnet" {
+  value = aws_subnet.elastic_private.*.id
 }
 
 output "available_zones" {
