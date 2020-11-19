@@ -141,6 +141,6 @@ resource "aws_route53_record" "wireguard" {
   alias {
     name                   = aws_elb.vpn.dns_name
     zone_id                = aws_elb.vpn.zone_id
-    evaluate_target_health = true
+    evaluate_target_health = false
   }
 }
