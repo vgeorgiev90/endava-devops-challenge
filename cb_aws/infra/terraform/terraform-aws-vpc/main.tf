@@ -16,20 +16,20 @@ resource "aws_vpc" "cb_vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "Staging VPC"
+    Name = "${var.name_prefix} VPC"
   }
 }
 
 ###################### Public subnet definitions ########################
 
 resource "aws_subnet" "public" {
-  count = 3
+  count = var.public_count
   vpc_id = aws_vpc.cb_vpc.id
   cidr_block = var.public_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available_zones.names[count.index]
 
   tags = {
-    Name = "Staging public subnet"
+    Name = "${var.name_prefix} public subnet"
     Tier = "Public"
   }
 }
@@ -38,13 +38,13 @@ resource "aws_subnet" "public" {
 ###################### Private subnets for EKS #####################
 
 resource "aws_subnet" "private" {
-  count = 3
+  count = var.private_count
   vpc_id = aws_vpc.cb_vpc.id
   cidr_block = var.private_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available_zones.names[count.index]
 
   tags = {
-    Name = "Staging private subnet"
+    Name = "${var.name_prefix} private subnet"
     Tier = "Private"
   }
 }
@@ -52,39 +52,39 @@ resource "aws_subnet" "private" {
 ################### Private subnets for services #############
 
 resource "aws_subnet" "db_private" {
-  count = 3
+  count = var.db_private_count
   vpc_id = aws_vpc.cb_vpc.id
   cidr_block = var.db_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available_zones.names[count.index]
 
   tags = {
-    Name = "database subnet"
+    Name = "${var.name_prefix} database subnet"
     Tier = "Private"
     Apps = "DB"
   }
 }
 
 resource "aws_subnet" "elastic_private" {
-  count = 3
+  count = var.es_private_count
   vpc_id = aws_vpc.cb_vpc.id
   cidr_block = var.es_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available_zones.names[count.index]
 
   tags = {
-    Name = "elastic subnet"
+    Name = "${var.name_prefix} elastic subnet"
     Tier = "Private"
     Apps = "ElasticSearch"
   }
 }
 
 resource "aws_subnet" "rmq_private" {
-  count = 3
+  count = var.rmq_private_count
   vpc_id = aws_vpc.cb_vpc.id
   cidr_block = var.rmq_subnet_cidrs[count.index]
   availability_zone = data.aws_availability_zones.available_zones.names[count.index]
 
   tags = {
-    Name = "RMQ subnet"
+    Name = "${var.name_prefix} RMQ subnet"
     Tier = "Private"
     Apps = "RMQ"
   }
@@ -101,14 +101,26 @@ resource "aws_eip" "nat" {
 }
 
 ################### Nat gateway ###########################
+data "aws_subnet_ids" "public_subs" {
+  vpc_id = aws_vpc.cb_vpc.id
+  tags = {
+    Tier = "Public"
+  }
+  depends_on = [aws_vpc.cb_vpc, aws_subnet.public]
+}
+
+resource "random_shuffle" "nat_subnet" {
+  input = data.aws_subnet_ids.public_subs.ids
+  result_count = 1
+}
 
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public.1.id
+  subnet_id     = random_shuffle.nat_subnet.result.0
   depends_on = [aws_internet_gateway.cb_gw]
 
   tags = {
-    Name = "NAT_private_subnets"
+    Name = "${var.name_prefix} NAT_private_subnets"
   }
 }
 
@@ -123,7 +135,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "Public route table"
+    Name = "${var.name_prefix} Public route table"
   }
 }
 
@@ -142,7 +154,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "Private route table"
+    Name = "${var.name_prefix} Private route table"
   }
 }
 
