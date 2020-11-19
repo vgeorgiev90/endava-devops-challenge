@@ -8,6 +8,9 @@
     name: ["php7.2-fpm", "php7.2-common", "nginx", "build-essential", "gcc", "make", "unzip", "sendmail", "inotify-tools", "expect", "libevent-dev", "libpcre2-dev", "libz-dev", "libssl-dev"]
     state: present
 
+- name: Clean nginx directory
+  shell: rm -rf /usr/share/nginx/html/*
+
 - name: clone ossec web UI
   git:
     repo: https://github.com/ossec/ossec-wui.git
@@ -27,13 +30,13 @@
 
 - copy:
     src: files/htpasswd
-    dest: /usr/share/nginx/html/ossec-wui/.htpasswd
+    dest: /usr/share/nginx/html/.htpasswd
     owner: root
     group: root
     mode: '0644'
 
 - file:
-    path: /usr/share/nginx/html/ossec-wui/tmp
+    path: /usr/share/nginx/html/tmp
     state: directory
     mode: '0777'
 
@@ -48,7 +51,7 @@
     dest: /root
     remote_src: True
 
-- name: Install OSSEC agent
+- name: Install OSSEC server
   shell: mv /root/ossec-hids-3.6.0 /root/ossec
 
 - copy:
@@ -59,4 +62,14 @@
 
 - shell: /root/ossec/install.sh
 
+- name: Allow www-data to access ossec dir
+  acl:
+    path: /var/ossec
+    recursive: yes
+    entity: www-data
+    etype: user
+    permissions: rx
+    state: present
+
 - shell: /var/ossec/bin/ossec-control start
+
