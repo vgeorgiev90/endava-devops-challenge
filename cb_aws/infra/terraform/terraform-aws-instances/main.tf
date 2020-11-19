@@ -57,7 +57,6 @@ resource "aws_instance" "security_server" {
 }
 
 
-
 ################ Build Server ###########################
 data "aws_ami" "build_server" {
   most_recent = true
@@ -245,6 +244,60 @@ resource "aws_alb_target_group_attachment" "wireguard_ssh" {
   target_id        = aws_instance.vpn_server.id 
 }
 
+############## Security LB ############################
+
+resource "aws_lb" "security" {
+  name               = "OSSECLoadBalancer"
+  internal           = true
+  subnets            = local.subnet_list
+
+  enable_cross_zone_load_balancing = true
+  tags = {
+    Name = "Ossec-LB"
+  }
+}
+
+############ OSSEC LB Listeners #################
+resource "aws_lb_listener" "security_listener" {
+  load_balancer_arn = aws_lb.security.arn
+  port              = 80
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.security_instance.arn
+  }
+  depends_on = [ aws_lb_target_group.security_instance ]
+}
+
+############ OSSEC LB Target Group ###############
+resource "aws_lb_target_group" "security_instance" {
+  name     = "SecurityServerTargetGroup"
+  port     = 80
+  protocol = "TCP"
+  vpc_id   = var.vpc_id
+  target_type = "instance"
+
+  health_check {
+    protocol = "HTTP"
+    port = 80
+  }
+
+  tags = {
+    Name = "Security-TG"
+  }
+}
+
+
+resource "aws_alb_target_group_attachment" "security" {
+  target_group_arn = aws_lb_target_group.security_instance.arn
+  target_id        = aws_instance.security_server.id
+}
+
+
+
+############## Route53 Records #########################
+
 resource "aws_route53_record" "wireguard" {
   zone_id = var.route53_zone_id
   name    = var.record_name
@@ -256,3 +309,16 @@ resource "aws_route53_record" "wireguard" {
   }
   depends_on = [aws_lb.vpn]
 }
+
+resource "aws_route53_record" "ossec" {
+  zone_id = var.route53_zone_id
+  name    = var.ossec_record_name
+  type    = "A"
+  alias {
+    name                   = aws_lb.security.dns_name
+    zone_id                = aws_lb.security.zone_id
+    evaluate_target_health = false
+  }
+  depends_on = [aws_lb.security]
+}
+

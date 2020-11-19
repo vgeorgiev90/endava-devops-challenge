@@ -49,6 +49,11 @@ variable "record_name" {
 	default = "vpn.aws.cobrowser.io"
 }
 
+variable "ossec_record_name" {
+	type = string
+	default = "ossec.aws.cobrowser.io"
+}
+
 variable "ssh_allowed_ips" {
 	type = list
         description = "IPs to whitelist for SSH access in CIDR format: 1.2.3.4/32"
