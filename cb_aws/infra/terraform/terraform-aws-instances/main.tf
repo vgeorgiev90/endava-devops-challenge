@@ -133,3 +133,14 @@ resource "aws_alb_target_group_attachment" "wireguard_ssh" {
   target_id        = aws_instance.vpn_server.id 
 }
 
+resource "aws_route53_record" "wireguard" {
+  zone_id = var.route53_zone_id
+  name    = var.record_name
+  type    = "A"
+  ttl     = "300"
+  alias {
+    name                   = aws_elb.vpn.dns_name
+    zone_id                = aws_elb.vpn.zone_id
+    evaluate_target_health = true
+  }
+}

@@ -40,3 +40,11 @@ variable "vpn_protocol" {
 	type = string
 	default = "UDP"
 }
+
+variable "route53_zone_id" {
+	type = string
+}
+
+variable "record_name" {
+	type = string
+}
