@@ -34,6 +34,79 @@ locals {
   
 }
 
+################ Security Host ##########################
+data "aws_ami" "security_server" {
+  most_recent = true
+  owners = [var.ami_owner]
+  filter {
+    name   = "name"
+    values = ["security-ubuntu20-*"]
+  }
+}
+
+resource "aws_instance" "security_server" {
+  ami                             = data.aws_ami.security_server.id
+  instance_type                   = var.security_instance_type
+  key_name                        = var.ssh_key_pair
+  vpc_security_group_ids          = [ aws_security_group.generic.id ]
+  subnet_id                       = random_shuffle.vpn_subnet.result.0
+  associate_public_ip_address = false
+  tags = {
+    Name = "OSSEC Server"
+  }
+}
+
+
+
+################ Build Server ###########################
+data "aws_ami" "build_server" {
+  most_recent = true
+  owners = [var.ami_owner]
+  filter {
+    name   = "name"
+    values = ["build-ubuntu20-*"]
+  }
+}
+
+resource "aws_instance" "build_server" {
+  ami                             = data.aws_ami.build_server.id
+  instance_type                   = var.build_instance_type
+  key_name                        = var.ssh_key_pair
+  vpc_security_group_ids          = [ aws_security_group.generic.id ]
+  subnet_id                       = random_shuffle.vpn_subnet.result.0
+  associate_public_ip_address = false
+  tags = {
+    Name = "BuildServer"
+  }
+}
+
+
+resource "aws_security_group" "generic" {
+  name        = "Generic"
+  description = "Generic SecurityGroup for all instances"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "VPC traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [ data.aws_vpc.deploy.cidr_block ]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Generic"
+  }
+}
+
+################ VPN Server ##############################
+
 resource "aws_instance" "vpn_server" {
   ami 				  = data.aws_ami.vpn_server.id
   instance_type 		  = var.vpn_instance_type
@@ -45,6 +118,7 @@ resource "aws_instance" "vpn_server" {
     Name = "Wireguard VPN"
   }
 }
+
 
 resource "aws_security_group" "vpn" {
   name        = "WireguardVpn"

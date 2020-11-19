@@ -7,6 +7,16 @@ variable "vpn_instance_type" {
 	default = "t3.medium"
 }
 
+variable "security_instance_type" {
+	type = string
+	default = "t3.medium"
+}
+
+variable "build_instance_type" {
+	type = string
+	default = "t3.medium"
+}
+
 variable "ssh_key_pair" {
 	type = string
 }
