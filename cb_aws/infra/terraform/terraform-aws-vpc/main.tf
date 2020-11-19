@@ -30,6 +30,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "Staging public subnet"
+    Tier = "Public"
   }
 }
 
@@ -44,6 +45,7 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "Staging private subnet"
+    Tier = "Private"
   }
 }
 
@@ -57,6 +59,8 @@ resource "aws_subnet" "db_private" {
 
   tags = {
     Name = "database subnet"
+    Tier = "Private"
+    Apps = "DB"
   }
 }
 
@@ -68,6 +72,8 @@ resource "aws_subnet" "elastic_private" {
 
   tags = {
     Name = "elastic subnet"
+    Tier = "Private"
+    Apps = "ElasticSearch"
   }
 }
 
@@ -79,6 +85,8 @@ resource "aws_subnet" "rmq_private" {
 
   tags = {
     Name = "RMQ subnet"
+    Tier = "Private"
+    Apps = "RMQ"
   }
 }
 #################### Internet Gateway #################

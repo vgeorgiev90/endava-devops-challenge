@@ -4,26 +4,15 @@ variable "ami_owner" {
 
 variable "vpn_instance_type" {
 	type = string
+	default = "t3.medium"
 }
 
 variable "ssh_key_pair" {
 	type = string
 }
 
-variable "vpn_subnet_id" {
-	type = string
-}
-
 variable "vpc_id" {
 	type = string
-}
-
-variable "vpc_cidr" {
-	type = string
-}
-
-variable "subnets_public" {
-	type = list
 }
 
 variable "region" {
@@ -47,4 +36,10 @@ variable "route53_zone_id" {
 
 variable "record_name" {
 	type = string
+	default = "vpn.aws.cobrowser.io"
+}
+
+variable "ssh_allowed_ips" {
+	type = list
+        description = "IPs to whitelist for SSH access in CIDR format: 1.2.3.4/32"
 }

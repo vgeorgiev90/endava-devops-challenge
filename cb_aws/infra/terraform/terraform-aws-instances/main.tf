@@ -13,21 +13,42 @@ data "aws_ami" "vpn_server" {
   }
 }
 
+data "aws_vpc" "deploy" {
+  id = var.vpc_id
+}
+
+data "aws_subnet_ids" "public" {
+  vpc_id = var.vpc_id
+  tags = {
+    Tier = "Public"
+  }
+}
+
+resource "random_shuffle" "vpn_subnet" {
+  input = data.aws_subnet_ids.public.ids
+  result_count = 1
+}
+
+locals {
+  subnet_list = tolist(data.aws_subnet_ids.public.ids)
+  
+}
+
 resource "aws_instance" "vpn_server" {
   ami 				  = data.aws_ami.vpn_server.id
   instance_type 		  = var.vpn_instance_type
   key_name               	  = var.ssh_key_pair
-  vpc_security_group_ids 	  = [ aws_security_group.generic.id ]
-  subnet_id              	  = var.vpn_subnet_id
+  vpc_security_group_ids 	  = [ aws_security_group.vpn.id ]
+  subnet_id              	  = random_shuffle.vpn_subnet.result.0
   associate_public_ip_address = false
   tags = {
     Name = "Wireguard VPN"
   }
 }
 
-resource "aws_security_group" "generic" {
-  name        = "Generic"
-  description = "Genric group for all instances"
+resource "aws_security_group" "vpn" {
+  name        = "WireguardVpn"
+  description = "Security group for the AWS VPN"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -35,8 +56,25 @@ resource "aws_security_group" "generic" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = [ data.aws_vpc.deploy.cidr_block ]
   }
+
+  ingress {
+    description = "SSH access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.ssh_allowed_ips
+  }
+
+  ingress {
+    description = "VPN access"
+    from_port   = 61443
+    to_port     = 61443
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
 
   egress {
     from_port   = 0
@@ -56,7 +94,7 @@ resource "aws_lb" "vpn" {
   name               = "VpnLoadBalancer"
   internal           = false
   load_balancer_type = "network"
-  subnets            = var.subnets_public
+  subnets            = local.subnet_list
 
   enable_cross_zone_load_balancing = true
   tags = {
@@ -137,10 +175,10 @@ resource "aws_route53_record" "wireguard" {
   zone_id = var.route53_zone_id
   name    = var.record_name
   type    = "A"
-  ttl     = "300"
   alias {
-    name                   = aws_elb.vpn.dns_name
-    zone_id                = aws_elb.vpn.zone_id
+    name                   = aws_lb.vpn.dns_name
+    zone_id                = aws_lb.vpn.zone_id
     evaluate_target_health = false
   }
+  depends_on = [aws_lb.vpn]
 }
