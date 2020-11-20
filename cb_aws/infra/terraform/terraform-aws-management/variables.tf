@@ -54,6 +54,11 @@ variable "ossec_record_name" {
 	default = "ossec.aws.cobrowser.io"
 }
 
+variable "build_record_name" {
+	type = string
+	default = "build.aws.cobrowser.io"
+}
+
 variable "ssh_allowed_ips" {
 	type = list
         description = "IPs to whitelist for SSH access in CIDR format: 1.2.3.4/32"

@@ -322,3 +322,10 @@ resource "aws_route53_record" "ossec" {
   depends_on = [aws_lb.security]
 }
 
+resource "aws_route53_record" "build" {
+  zone_id = var.route53_zone_id
+  name    = var.build_record_name
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.build_server.private_ip]
+}
