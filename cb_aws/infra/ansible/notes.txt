@@ -1,6 +1,0 @@
-1. Change hostname
-1a. Take care of service discovery
-2. Restart rmq service
-3. rabbitmqctl stop_app
-4. rabbitmqctl join_cluster rabbit@HOSTNAME1
-5. rabbitmqctl start_app

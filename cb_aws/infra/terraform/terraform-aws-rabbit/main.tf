@@ -69,41 +69,8 @@ data "aws_subnet_ids" "rmq_private" {
 
 locals {
   rmq_subnet_list = tolist(data.aws_subnet_ids.rmq_private.ids)
-  instance_userdata = <<EOF
-#!/bin/bash
-
-ZONE_ID="${var.zone_id}"
-ENV="${var.name_prefix}"
-
-RABBIT_NAME=${ENV}-rabbit
-AWS_CLI=$(which aws)
-
-if [ -z $AWS_CLI ];then
-        apt-get update; apt install python-pip -y
-        pip install awscli
-fi
-
-TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
-LOCAL_IP=$(curl -H "X-aws-ec2-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4)
-INDEX=$(curl -H "X-aws-ec2-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/ami-launch-index)
-DNS_NAME="${RABBIT_NAME}${INDEX}.aws.cobrowser.io"
-
-cat > /tmp/rabbit-record-set.json << EOF
-                {
-                  "Comment": "RabbitMQ Node: ${INDEX}",
-                  "Changes": [{
-                        "Action": "CREATE",
-                        "ResourceRecordSet": {
-                            "Name": "${DNS_NAME}",
-                            "Type": "A",
-                            "ResourceRecords": [{ "Value": "${LOCAL_IP}"}]
-                              }
-                          }]
-                }
-EOF
-aws route53 change-resource-record-sets --hosted-zone-id ${ZONE_ID} --change-batch file:///tmp/rabbit-record-set.json
-EOF
 }
+
 
 ############################### RMQ Launch config ############################
 
@@ -115,9 +82,8 @@ resource "aws_launch_configuration" "rabbit_config" {
   security_groups = [ var.security_group_id ]
   associate_public_ip_address = false
   ebs_optimized = false
-  user_data = file("userdata")
   iam_instance_profile = aws_iam_instance_profile.route53_profile.id
-  user_data_base64 = base64encode(local.instance_userdata)
+  user_data_base64 = base64encode(templatefile("../../scripts/rabbit_bootstrap.tpl", {zone = var.zone_id, env = var.name_prefix, queue_user_password = var.queue_user_password}))
   root_block_device {
     volume_type = "gp2"
     volume_size = var.rabbit_volume_size
@@ -136,10 +102,17 @@ resource "aws_autoscaling_group" "rabbit_ag" {
   metrics_granularity = "1Minute"
   launch_configuration = aws_launch_configuration.rabbit_config.name
 
-  tags = {
-    Name = "${var.name_prefix}-rabbit"
+  tags = [{
+    key = "Name"
+    value = "${var.name_prefix}-rabbit"
     propagate_at_launch = true
-  }
+  },
+  {
+    key = "application"
+    value = "rabbitmq"
+    propagate_at_launch = true
+  }]
+
 }
 
 ########### Autoscaling policies ################
