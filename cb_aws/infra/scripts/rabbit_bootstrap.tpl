@@ -7,7 +7,6 @@ set -x
 ZONE_ID="${zone}"
 ENV="${env}"
 
-
 RABBIT_NAME=$${ENV}-rabbit
 AWS_CLI=$(which aws)
 
@@ -18,9 +17,10 @@ fi
 
 TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
 LOCAL_IP=`curl -H "X-aws-ec2-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4`
+BASE_DOMAIN=`aws route53 list-hosted-zones-by-name | grep $${ZONE_ID} -C 2 | grep -i name | awk -F":" '{print $2}' | awk -F"\"" '{print $2}'`
 
 INDEX=0
-DNS_NAME="$${RABBIT_NAME}-$${INDEX}.aws.cobrowser.io"
+DNS_NAME="$${RABBIT_NAME}-$${INDEX}.$${BASE_DOMAIN::-1}"
 
 
 cat > /tmp/rabbit-record-set.json << EOF
@@ -42,7 +42,7 @@ result=$?
 
 until [ $result -eq 0 ];do
         INDEX=$(($INDEX + 1))
-        DNS_NAME="$${RABBIT_NAME}-$${INDEX}.aws.cobrowser.io"
+        DNS_NAME="$${RABBIT_NAME}-$${INDEX}.$${BASE_DOMAIN::-1}"
 cat > /tmp/rabbit-record-set.json << EOF
                 {
                   "Comment": "RabbitMQ Node: $${INDEX}",
