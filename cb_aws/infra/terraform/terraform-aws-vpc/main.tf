@@ -175,3 +175,10 @@ resource "aws_route_table_association" "rmq_private_association" {
   subnet_id = aws_subnet.rmq_private.*.id[count.index]
   route_table_id  = aws_route_table.private.id
 }
+
+resource "aws_route_table_association" "es_private_association" {
+  count = length(aws_subnet.elastic_private)
+  subnet_id = aws_subnet.elastic_private.*.id[count.index]
+  route_table_id  = aws_route_table.private.id
+}
+
