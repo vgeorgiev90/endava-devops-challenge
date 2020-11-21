@@ -64,7 +64,7 @@ echo "DNS Record added with index: $${INDEX}"
 done
 hostnamectl set-hostname $${DNS_NAME}
 sleep 20
-echo -y | /usr/share/elasticsearch/bin/elasticsearch-plugin install discovery-ec2
+echo y | /usr/share/elasticsearch/bin/elasticsearch-plugin install discovery-ec2
 sed -i "s/__NODE_NAME__/$${DNS_NAME}/; s/__CLUSTER_NAME__/$${ELASTIC_NAME}/; s/__TAG__/$${ELASTIC_NAME}/" /etc/elasticsearch/elasticsearch.yml
 
 rm /var/lib/elasticsearch/* -rf
