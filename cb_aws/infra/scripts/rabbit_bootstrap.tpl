@@ -114,7 +114,7 @@ systemctl restart rabbitmq-server
 sleep 20
 if [ $${INDEX} -ne 0 ];then
     rabbitmqctl stop_app
-    rabbitmqctl join_cluster rabbit@$${RABBIT_NAME}-0.aws.cobrowser.io
+    rabbitmqctl join_cluster rabbit@$${RABBIT_NAME}-0.$${BASE_DOMAIN::-1}
     rabbitmqctl start_app
 fi
 
