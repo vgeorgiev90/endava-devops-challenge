@@ -7,7 +7,6 @@ set -x
 ZONE_ID="${zone}"
 ENV="${env}"
 
-systemctl stop elasticsearch
 
 ELASTIC_NAME=$${ENV}-elastic
 AWS_CLI=$(which aws)
@@ -65,13 +64,12 @@ echo "DNS Record added with index: $${INDEX}"
 done
 hostnamectl set-hostname $${DNS_NAME}
 sleep 20
-sed -i "s/node.name: default/node.name: $${DNS_NAME}/; s/cluster.name: elk-acme/cluster.name: $${ELASTIC_NAME}/;" /etc/elasticsearch/elasticsearch.yml
-sed -i "s/cluster.initial_master_nodes: elk01,elk02,elk03/cluster.initial_master_nodes: $${ELASTIC_NAME}-0.$${BASE_DOMAIN::-1},$${ELASTIC_NAME}-1.$${BASE_DOMAIN::-1},$${ELASTIC_NAME}-2.$${BASE_DOMAIN::-1}/" /etc/elasticsearch/elasticsearch.yml
-sed -i "s/discovery.seed_hosts: elk01,elk02,elk03/discovery.seed_hosts: $${ELASTIC_NAME}-0.$${BASE_DOMAIN::-1},$${ELASTIC_NAME}-1.$${BASE_DOMAIN::-1},$${ELASTIC_NAME}-2.$${BASE_DOMAIN::-1}/" /etc/elasticsearch/elasticsearch.yml
-echo 'node.master: true' >> /etc/elasticsearch/elasticsearch.yml
-echo 'node.data: true' >> /etc/elasticsearch/elasticsearch.yml
+echo -y | /usr/share/elasticsearch/bin/elasticsearch-plugin install discovery-ec2
+sed -i "s/__NODE_NAME__/$${DNS_NAME}/; s/__CLUSTER_NAME__/$${ELASTIC_NAME}/; s/__TAG__/$${ELASTIC_NAME}/" /etc/elasticsearch/elasticsearch.yml
 
 rm /var/lib/elasticsearch/* -rf
+
+systemctl enable elasticsearch
 systemctl restart elasticsearch
 
 

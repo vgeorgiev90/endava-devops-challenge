@@ -1,0 +1,30 @@
+- hosts: all
+  become: yes
+  roles:
+  - generic
+  - sd_monitoring
+  - ossec_agent
+  - elastic.elasticsearch
+  - os_hardening
+  - ssh_hardening
+  vars:
+    es_version: 7.6.2
+    es_heap_size: 1g
+    es_start_service: false
+    es_config:
+      indices.memory.index_buffer_size: 512M
+      cluster.name: __CLUSTER_NAME__
+      node.name: __NODE_NAME__
+      network.host: [_ec2_,_local_]
+      http.port: 9200
+      discovery.zen.minimum_master_nodes: 2
+      discovery.zen.hosts_provider: ec2
+      bootstrap.memory_lock: true
+      discovery.ec2.endpoint: ec2.eu-west-1.amazonaws.com
+      discovery.ec2.tag.ec2discovery: __TAG__
+      discovery.ec2.availability_zones: eu-west-1a, eu-west-1b, eu-west-1c
+      discovery.ec2.host_type: private_ip
+      node.master: true
+      node.data: true
+      node.ingest: true
+

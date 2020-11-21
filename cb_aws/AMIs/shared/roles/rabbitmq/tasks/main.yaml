@@ -1,0 +1,53 @@
+- name: Get rabbitmq sign key
+  apt_key:
+    url: "https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc"
+    state: present
+    
+- name: Add erlang and rabbit repositories
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+  - "deb https://dl.bintray.com/rabbitmq-erlang/debian bionic erlang"
+  - "deb https://dl.bintray.com/rabbitmq/debian bionic main"
+
+- name: Install rabbitmq-server
+  apt:
+    name: rabbitmq-server
+    state: present
+
+- name: NoFile for rabbitmq
+  lineinfile:
+    path: /etc/systemd/system/multi-user.target.wants/rabbitmq-server.service
+    regexp: '^LimitNOFILE='
+    line: LimitNOFILE=64000
+
+- shell: systemctl daemon-reload
+
+- name: Rabbit management plugin
+  copy:
+    content: '[rabbitmq_management].'
+    dest: /etc/rabbitmq/enabled_plugins
+    owner: root
+    group: root
+    mode: '0644'
+
+- copy:
+    src: files/rabbitmq.conf
+    dest: /etc/rabbitmq/rabbitmq.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- template:
+    src: files/definitions.json
+    dest: /etc/rabbitmq/definitions.json
+    owner: root
+    group: root
+    mode: '0644'
+
+- service:
+    name: rabbitmq-server
+    state: restarted
+    enabled: yes

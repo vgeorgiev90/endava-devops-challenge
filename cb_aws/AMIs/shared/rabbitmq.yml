@@ -4,7 +4,8 @@
   - generic
   - sd_monitoring
   - ossec_agent
-  - geerlingguy.rabbitmq
+  - rabbitmq
   - os_hardening
   - ssh_hardening
-
+  vars:
+    queue_user_password: y6EawPHh87hF6UWoZcy9ycUea28

@@ -1,0 +1,28 @@
+{
+      "users": [
+        {
+          "name": "queue_user",
+          "password": "{{ queue_user_password }}",
+          "tags": ""
+        }
+      ],
+      "permissions": [
+        {
+          "user": "queue_user",
+          "vhost": "/",
+          "configure": ".*",
+          "write": ".*",
+          "read": ".*"
+        }
+      ],
+      "vhosts": [{"name": "/"}],
+      "policies":[
+        {
+          "vhost":"/",
+          "name":"ha",
+          "pattern":"",
+          "priority": 0,
+          "definition":{"ha-mode":"all","ha-sync-mode":"automatic"}}
+      ]
+}
+

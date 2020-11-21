@@ -9,7 +9,7 @@
   - os_hardening
   - ssh_hardening
   vars:
-    mongodb_package: mongodb-org-ubuntu-20
+    mongodb_package: mongodb-org
     mongodb_net_bindip: 0.0.0.0
     mongodb_replication_replset: rs0
     mongodb_disable_transparent_hugepages: true

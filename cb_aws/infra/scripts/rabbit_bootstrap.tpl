@@ -67,48 +67,6 @@ RABBITMQ_NODENAME=rabbit@$${DNS_NAME}
 RABBITMQ_USE_LONGNAME=true
 EOF
 
-cat > /etc/rabbitmq/rabbitmq.conf << EOF
-log.default.level = warning
-log.connection.level = warning
-queue_master_locator=min-masters
-management.load_definitions = /etc/rabbitmq/definitions.json
-EOF
-
-echo "[rabbitmq_management]." > /etc/rabbitmq/enabled_plugins
-
-cat > /etc/rabbitmq/definitions.json << EOF
-{
-      "users": [
-        {
-          "name": "queue_user",
-          "password": "${queue_user_password}",
-          "tags": ""
-        }
-      ],
-      "permissions": [
-        {
-          "user": "queue_user",
-          "vhost": "/",
-          "configure": ".*",
-          "write": ".*",
-          "read": ".*"
-        }
-      ],
-      "vhosts": [{"name": "/"}],
-      "policies":[
-        {
-          "vhost":"/",
-          "name":"ha",
-          "pattern":"",
-          "priority": 0,
-          "definition":{"ha-mode":"all","ha-sync-mode":"automatic"}}
-      ]
-}
-EOF
-
-sed -i 's/LimitNOFILE=32768/LimitNOFILE=64000/g' /etc/systemd/system/multi-user.target.wants/rabbitmq-server.service
-
-systemctl daemon-reload
 systemctl restart rabbitmq-server
 
 sleep 20

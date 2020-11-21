@@ -1,0 +1,6 @@
+---
+- src: elastic.elasticsearch
+  version: "7.6.2"
+
+- src: undergreen.mongodb
+

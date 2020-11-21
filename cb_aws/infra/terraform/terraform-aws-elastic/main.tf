@@ -27,6 +27,25 @@ resource "aws_iam_role_policy" "route53_policy" {
 EOF
 }
 
+################ EC2 Describe policy for elasticsearch auto cluster discovery #####
+
+resource "aws_iam_role_policy" "ec2describe_policy" {
+  name = "ec2describe_policy_es"
+  role = aws_iam_role.route53_role.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+     {
+       "Effect": "Allow",
+       "Action": "ec2:DescribeInstances",
+       "Resource": "*"
+     }
+  ]
+}
+EOF
+}
 
 resource "aws_iam_role" "route53_role" {
   name = "route53_role_es"
@@ -46,6 +65,9 @@ resource "aws_iam_role" "route53_role" {
 }
 EOF
 }
+
+
+
 
 ################################### Rabbitmq cluster aws data ###############################
 
@@ -110,6 +132,11 @@ resource "aws_autoscaling_group" "elastic_ag" {
   {
     key = "application"
     value = "elasticsearch"
+    propagate_at_launch = true
+  },
+  {
+    key = "ec2discovery"
+    value = "${var.name_prefix}-elastic"
     propagate_at_launch = true
   }]
 

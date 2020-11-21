@@ -8,7 +8,8 @@
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
-             "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+                    "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+
           "root-device-type": "ebs"
         },
         "owners": ["099720109477"],
@@ -16,29 +17,29 @@
       },
       "instance_type": "t2.medium",
       "ssh_username": "ubuntu",
-      "ami_name": "rabbitmq-ubuntu18-{{timestamp}}"
+      "ami_name": "elasticsearch-ubuntu18-{{timestamp}}"
     }
   ],
-    "provisioners": [
-    {
-      "galaxy_file": "../shared/requirements.yml",
-      "galaxy_force_install": "true",
-      "user": "ubuntu",
-      "playbook_file": "../shared/rabbitmq.yml",
-      "type": "ansible"
-    },
-    {
+  "provisioners": [
+  {
+    "galaxy_file": "../shared/requirements.yml",
+    "galaxy_force_install": "true",
+    "playbook_file": "../shared/elasticsearch.yml",
+    "user": "ubuntu",
+    "type": "ansible"
+  },
+  {
       "type": "inspec",
       "user": "ubuntu",
       "profile": "file://../generic/specs/linux-baseline",
       "extra_arguments": ["--chef-license=accept", "--sudo", "--no-distinct-exit"]
-    },
-    {
+  },
+  {
       "type": "inspec",
       "user": "ubuntu",
       "profile": "file://../generic/specs/ssh-baseline",
       "extra_arguments": ["--chef-license=accept", "--sudo", "--no-distinct-exit"]
-    }
-  ]
+  }
+]
 }
 
