@@ -7,6 +7,8 @@ set -x
 ZONE_ID="${zone}"
 ENV="${env}"
 
+systemctl stop elasticsearch
+
 ELASTIC_NAME=$${ENV}-elastic
 AWS_CLI=$(which aws)
 
@@ -68,8 +70,8 @@ sed -i "s/cluster.initial_master_nodes: elk01,elk02,elk03/cluster.initial_master
 sed -i "s/discovery.seed_hosts: elk01,elk02,elk03/discovery.seed_hosts: $${ELASTIC_NAME}-0.$${BASE_DOMAIN::-1},$${ELASTIC_NAME}-1.$${BASE_DOMAIN::-1},$${ELASTIC_NAME}-2.$${BASE_DOMAIN::-1}/" /etc/elasticsearch/elasticsearch.yml
 echo 'node.master: true' >> /etc/elasticsearch/elasticsearch.yml
 echo 'node.data: true' >> /etc/elasticsearch/elasticsearch.yml
-echo "discovery.zen.ping.unicast.hosts: [\"$${ELASTIC_NAME}-0.$${BASE_DOMAIN::-1}\", \"$${ELASTIC_NAME}-1.$${BASE_DOMAIN::-1}\", \"$${ELASTIC_NAME}-2.$${BASE_DOMAIN::-1}\"]" >> /etc/elasticsearch/elasticsearch.yml
 
+rm /var/lib/elasticsearch/* -rf
 systemctl restart elasticsearch
 
 
