@@ -71,7 +71,7 @@ chmod 600 /etc/mongodb/mongo.key
 
 cat /etc/mongod.conf \
    | yq w - security.keyFile /etc/mongodb/mongo.key \
-   | yq w - replication.replSetName rs$${INDEX} \
+   | yq w - replication.replSetName $${MONGO_NAME} \
    | tee /tmp/mongod
 
 rm /etc/mongod.conf -rf && mv /tmp/mongod /etc/mongod.conf && chmod 644 /etc/mongod.conf
@@ -81,7 +81,7 @@ systemctl restart mongod
 
 sleep 20
 if [ $${INDEX} -eq 0 ];then
-	mongo --username siteRootAdmin --password $${ADMIN_PASS} --eval 'rs.initiate( {_id : "$${MONGO_NAME}",members: [{ _id: 0, host: "$${MONGO_NAME}-0.$${BASE_DOMAIN::-1}:27017" },{ _id: 1, host: "$${MONGO_NAME}-1.$${BASE_DOMAIN::-1}:27017" },{ _id: 2, host: "$${MONGO_NAME}-2.$${BASE_DOMAIN::-1}:27017" }]});'
+	mongo --username siteRootAdmin --password $${ADMIN_PASS} --eval "rs.initiate( {_id : \"$${MONGO_NAME}\",members: [{ _id: 0, host: \"$${MONGO_NAME}-0.$${BASE_DOMAIN::-1}:27017\" },{ _id: 1, host: \"$${MONGO_NAME}-1.$${BASE_DOMAIN::-1}:27017\" },{ _id: 2, host: \"$${MONGO_NAME}-2.$${BASE_DOMAIN::-1}:27017\" }]});"
 fi
 
 
