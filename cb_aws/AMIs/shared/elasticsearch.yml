@@ -17,8 +17,7 @@
       node.name: __NODE_NAME__
       network.host: [_ec2_,_local_]
       http.port: 9200
-      discovery.zen.minimum_master_nodes: 2
-      discovery.zen.hosts_provider: ec2
+      discovery.seed_providers: ec2
       bootstrap.memory_lock: true
       discovery.ec2.endpoint: ec2.eu-west-1.amazonaws.com
       discovery.ec2.tag.ec2discovery: __TAG__
@@ -27,4 +26,3 @@
       node.master: true
       node.data: true
       node.ingest: true
-
