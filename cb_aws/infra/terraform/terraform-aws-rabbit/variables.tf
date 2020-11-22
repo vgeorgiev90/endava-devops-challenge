@@ -20,12 +20,6 @@ variable "name_prefix" {
 	default = "staging"
 }
 
-variable "queue_user_password" {
-	type = string
-	description = "Password for rabbitmq queue user"
-	default = "y6EawPHh87hF6UWoZcy9ycUea28"
-}
-
 variable "rabbit_instance_type" {
 	type = string
 	default = "t3.small"
