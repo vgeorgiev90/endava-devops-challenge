@@ -22,7 +22,6 @@
     "provisioners": [
     {
       "galaxy_file": "../shared/requirements.yml",
-      "galaxy_force_install": "true",
       "user": "ubuntu",
       "playbook_file": "../shared/mongo.yml",
       "type": "ansible"

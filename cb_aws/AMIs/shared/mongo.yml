@@ -11,6 +11,12 @@
   vars:
     mongodb_package: mongodb-org
     mongodb_net_bindip: 0.0.0.0
-    mongodb_replication_replset: rs0
     mongodb_disable_transparent_hugepages: true
+    mongodb_security_authorization: enabled
+    mongodb_user_admin_name: siteUserAdmin
+    mongodb_user_admin_password: password
+    mongodb_root_admin_name: siteRootAdmin
+    mongodb_root_admin_password: password
+    mongodb_root_backup_name: backupuser
+    mongodb_root_backup_password: password
 

@@ -1,0 +1,77 @@
+- name: Update apt cache if needed.
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: ntp for clusters
+  apt:
+    name: ["ntp", "python3-pip"]
+    state: present
+
+- name: set various sysctl settings
+  sysctl:
+    name: vm.swappiness
+    value: 1
+    state: present
+
+  sysctl:
+    name: vm.dirty_ratio
+    value: 15
+    state: present
+
+  sysctl:
+    name: vm.dirty_background_ratio
+    value: 5
+    state: present
+
+  sysctl:
+    name: net.core.somaxconn
+    value: 4096
+    state: present
+
+  sysctl:
+    name: net.ipv4.tcp_fin_timeout
+    value: 30
+    state: present
+
+  sysctl:
+    name: net.ipv4.tcp_keepalive_intvl
+    value: 30
+    state: present
+
+  sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: 120
+    state: present
+
+  sysctl:
+    name: net.ipv4.tcp_max_syn_backlog
+    value: 4096
+    state: present
+
+  sysctl:
+    name: net.ipv4.tcp_keepalive_probes
+    value: 6
+    state: present
+
+- name: Set optimal mongodb ulimit settings
+  copy:
+    src: files/30-mongo.conf
+    dest: /etc/security/limits.d/30-mongo.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: set noatime
+  mount:
+    path: /
+    opts: noatime,errors=remount-ro
+    state: remounted
+
+- file:
+    path: /etc/mongodb
+    state: directory
+    owner: root
+    group: root
+    mode: '0640'
+
+- shell: openssl rand -base64 756 > /etc/mongodb/mongo.key
+
