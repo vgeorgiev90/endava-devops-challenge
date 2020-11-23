@@ -9,17 +9,17 @@ Resources included:
 
 
 Variables explanation:
-ami_owner              --> type = string                        -->  AWS AMI Owner ID
-vpc_id                 --> type = string                        -->  VPC where the resources will be deployed ( Check the tagging requirements if you deploy to your own vpc )
-private_zone_id        --> type = string                        -->  Route53 private zone ID for the DNS records
-name_prefix            --> type = string, default = "staging"   -->  Name prefix to be used for resource tagging and DNS name creation (Keep consistent).
-mongo_instance_type    --> type = string, default = "t3.small"  -->  Instance type for MongoDB
-ssh_key_pair           --> type = string                        -->  SSH key pair to be used for the instances ( Name of the existing ssh key pair )
-security_group_id      --> type = string                        -->  Security group for the instances (Use the generic group created with the VPC module, or make sure traffic from the VPC cidr is allowed)
-mongo_volume_size      --> type = number, default = 30          -->  Disk space size for the instances ( GB )
-mongo_max_instances    --> type = number, default = 5           -->  Maximum number of instances for the AG group
-mongo_min_instances    --> type = number, default = 3           -->  Desired number of instances ( keep default )
-mongo_root_password    --> type = string                        -->  Root password for mongodb ( Check the image build ansible playbook )
+* ami_owner              --> type = string                        -->  AWS AMI Owner ID
+* vpc_id                 --> type = string                        -->  VPC where the resources will be deployed ( Check the tagging requirements if you deploy to your own vpc )
+* private_zone_id        --> type = string                        -->  Route53 private zone ID for the DNS records
+* name_prefix            --> type = string, default = "staging"   -->  Name prefix to be used for resource tagging and DNS name creation (Keep consistent).
+* mongo_instance_type    --> type = string, default = "t3.small"  -->  Instance type for MongoDB
+* ssh_key_pair           --> type = string                        -->  SSH key pair to be used for the instances ( Name of the existing ssh key pair )
+* security_group_id      --> type = string                        -->  Security group for the instances (Use the generic group created with the VPC module, or make sure traffic from the VPC cidr is allowed)
+* mongo_volume_size      --> type = number, default = 30          -->  Disk space size for the instances ( GB )
+* mongo_max_instances    --> type = number, default = 5           -->  Maximum number of instances for the AG group
+* mongo_min_instances    --> type = number, default = 3           -->  Desired number of instances ( keep default )
+* mongo_root_password    --> type = string                        -->  Root password for mongodb ( Check the image build ansible playbook )
 
 
 Notes:

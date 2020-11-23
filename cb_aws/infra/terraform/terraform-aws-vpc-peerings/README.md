@@ -6,9 +6,9 @@ Resources included:
 
 
 Variables explanation:
-peer_vpc_id  -->  type = string                         -->  ID of the vpc peer
-vpc_id       -->  type = string                         -->  ID of the main vpc
-name_prefix  -->  type = string, default = "staging"    -->  Name prefix to be used for resource tagging and search (keep consistent.)
+* peer_vpc_id  -->  type = string                         -->  ID of the vpc peer
+* vpc_id       -->  type = string                         -->  ID of the main vpc
+* name_prefix  -->  type = string, default = "staging"    -->  Name prefix to be used for resource tagging and search (keep consistent.)
 
 
 

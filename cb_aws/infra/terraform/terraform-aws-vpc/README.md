@@ -14,19 +14,18 @@ Resources included:
 
 
 Variables explanation:
-
-vpc_cidr             -> type = string, default = "192.168.0.0/16"                                        --> CIDR block for the VPC
-public_subnet_cidrs  -> type = list, default = ["192.168.1.0/24", "192.168.2.0/24", "192.168.3.0/24"]    --> CIDR blocks for the public subnets
-private_subnet_cidrs -> type = list, default = ["192.168.4.0/24", "192.168.5.0/24", "192.168.6.0/24"]    --> CIDR blocks for the private subnets
-db_subnet_cidrs      -> type = list, default = ["192.168.7.0/24", "192.168.8.0/24", "192.168.9.0/24"]    --> CIDR blocks for the MongoDB subnets
-rmq_subnet_cidrs     -> type = list, default = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"] --> CIDR blocks for the RMQ subnets
-es_subnet_cidrs      -> type = list, default = ["192.168.13.0/24", "192.168.14.0/24", "192.168.15.0/24"] --> CIDR blocks for the Elastic subnets
-name_prefix          -> type = string, default = "Staging"                                               --> Name prefix for almost all resources that will be created ( keep this consistent in all modules )
-public_count         -> type = number, default = 3                                                       --> How many public subnets do we want
-private_count        -> type = number, default = 3                                                       --> How many private subnets do we want
-db_private_count     -> type = number, default = 3                                                       --> How many database private subnets do we want
-es_private_count     -> type = number, default = 3                                                       --> How many elastic private subnets do we want
-rmq_private_count    -> type = number, default = 3                                                       --> How many rabbitmq private subnets do we want
+* vpc_cidr             -> type = string, default = "192.168.0.0/16"                                        --> CIDR block for the VPC
+* public_subnet_cidrs  -> type = list, default = ["192.168.1.0/24", "192.168.2.0/24", "192.168.3.0/24"]    --> CIDR blocks for the public subnets
+* private_subnet_cidrs -> type = list, default = ["192.168.4.0/24", "192.168.5.0/24", "192.168.6.0/24"]    --> CIDR blocks for the private subnets
+* db_subnet_cidrs      -> type = list, default = ["192.168.7.0/24", "192.168.8.0/24", "192.168.9.0/24"]    --> CIDR blocks for the MongoDB subnets
+* rmq_subnet_cidrs     -> type = list, default = ["192.168.10.0/24", "192.168.11.0/24", "192.168.12.0/24"] --> CIDR blocks for the RMQ subnets
+* es_subnet_cidrs      -> type = list, default = ["192.168.13.0/24", "192.168.14.0/24", "192.168.15.0/24"] --> CIDR blocks for the Elastic subnets
+* name_prefix          -> type = string, default = "Staging"                                               --> Name prefix for almost all resources that will be created ( keep this consistent in all modules )
+* public_count         -> type = number, default = 3                                                       --> How many public subnets do we want
+* private_count        -> type = number, default = 3                                                       --> How many private subnets do we want
+* db_private_count     -> type = number, default = 3                                                       --> How many database private subnets do we want
+* es_private_count     -> type = number, default = 3                                                       --> How many elastic private subnets do we want
+* rmq_private_count    -> type = number, default = 3                                                       --> How many rabbitmq private subnets do we want
 
 
 
