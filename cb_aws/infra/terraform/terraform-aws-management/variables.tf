@@ -45,8 +45,14 @@ variable "vpn_protocol" {
 	default = "UDP"
 }
 
-variable "route53_zone_id" {
+variable "route53_public_zone_id" {
 	type = string
+	description = "Route53 Public Zone"
+}
+
+variable "route53_private_zone_id" {
+	type = string
+	description = "Route53 Private Zone"
 }
 
 variable "record_name" {
@@ -56,12 +62,12 @@ variable "record_name" {
 
 variable "ossec_record_name" {
 	type = string
-	default = "ossec.aws.cobrowser.io"
+	default = "ossec.internal.aws.cobrowser.io"
 }
 
 variable "build_record_name" {
 	type = string
-	default = "build.aws.cobrowser.io"
+	default = "build.internal.aws.cobrowser.io"
 }
 
 variable "ssh_allowed_ips" {

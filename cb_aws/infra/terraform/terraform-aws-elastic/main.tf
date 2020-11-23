@@ -105,7 +105,7 @@ resource "aws_launch_configuration" "elastic_config" {
   associate_public_ip_address = false
   ebs_optimized = false
   iam_instance_profile = aws_iam_instance_profile.route53_profile.id
-  user_data_base64 = base64encode(templatefile("../../scripts/elastic_bootstrap.tpl", {zone = var.zone_id, env = var.name_prefix}))
+  user_data_base64 = base64encode(templatefile("../../scripts/elastic_bootstrap.tpl", {zone = var.private_zone_id, env = var.name_prefix}))
   root_block_device {
     volume_type = "gp2"
     volume_size = var.elastic_volume_size

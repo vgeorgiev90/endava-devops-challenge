@@ -83,7 +83,7 @@ resource "aws_launch_configuration" "mongo_config" {
   associate_public_ip_address = false
   ebs_optimized = false
   iam_instance_profile = aws_iam_instance_profile.route53_profile_db.id
-  user_data_base64 = base64encode(templatefile("../../scripts/mongo_bootstrap.tpl", {zone = var.zone_id, env = var.name_prefix, mongo_admin_pass = var.mongo_root_password}))
+  user_data_base64 = base64encode(templatefile("../../scripts/mongo_bootstrap.tpl", {zone = var.private_zone_id, env = var.name_prefix, mongo_admin_pass = var.mongo_root_password}))
   root_block_device {
     volume_type = "gp2"
     volume_size = var.mongo_volume_size

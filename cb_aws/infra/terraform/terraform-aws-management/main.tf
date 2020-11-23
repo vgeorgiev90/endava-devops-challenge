@@ -275,7 +275,7 @@ resource "aws_alb_target_group_attachment" "security" {
 ############## Route53 Records #########################
 
 resource "aws_route53_record" "wireguard" {
-  zone_id = var.route53_zone_id
+  zone_id = var.route53_public_zone_id
   name    = var.record_name
   type    = "A"
   alias {
@@ -287,7 +287,7 @@ resource "aws_route53_record" "wireguard" {
 }
 
 resource "aws_route53_record" "ossec" {
-  zone_id = var.route53_zone_id
+  zone_id = var.route53_private_zone_id
   name    = var.ossec_record_name
   type    = "A"
   alias {
@@ -299,7 +299,7 @@ resource "aws_route53_record" "ossec" {
 }
 
 resource "aws_route53_record" "build" {
-  zone_id = var.route53_zone_id
+  zone_id = var.route53_private_zone_id
   name    = var.build_record_name
   type    = "A"
   ttl     = "300"

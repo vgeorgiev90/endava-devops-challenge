@@ -9,6 +9,7 @@ data "aws_subnet_ids" "eks_private" {
   vpc_id = var.vpc_id
   tags = {
     Tier = "Private"
+    Apps = "EKS"
   }
 }
 
