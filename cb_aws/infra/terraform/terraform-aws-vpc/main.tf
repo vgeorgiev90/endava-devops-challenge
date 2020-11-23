@@ -17,6 +17,7 @@ resource "aws_vpc" "cb_vpc" {
 
   tags = {
     Name = "${var.name_prefix} VPC"
+    
   }
 }
 
@@ -31,6 +32,8 @@ resource "aws_subnet" "public" {
   tags = {
     Name = "${var.name_prefix} public subnet"
     Tier = "Public"
+    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/${var.name_prefix}-eks" = "shared"
   }
 }
 
@@ -46,6 +49,8 @@ resource "aws_subnet" "private" {
   tags = {
     Name = "${var.name_prefix} private subnet"
     Tier = "Private"
+    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/${var.name_prefix}-eks" = "shared"
   }
 }
 
@@ -180,5 +185,29 @@ resource "aws_route_table_association" "es_private_association" {
   count = length(aws_subnet.elastic_private)
   subnet_id = aws_subnet.elastic_private.*.id[count.index]
   route_table_id  = aws_route_table.private.id
+}
+
+resource "aws_security_group" "generic" {
+  name        = "Generic"
+  description = "Generic SecurityGroup for all instances"
+  vpc_id      = aws_vpc.cb_vpc.id
+
+  ingress {
+    description = "VPC traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [ var.vpc_cidr ]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Generic"
+  }
 }
 

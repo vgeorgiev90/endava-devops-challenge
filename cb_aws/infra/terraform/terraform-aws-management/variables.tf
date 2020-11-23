@@ -2,6 +2,11 @@ variable "ami_owner" {
 	type = string
 }
 
+variable "generic_security_group_id" {
+	type = string
+	description = "ID of the generic security group that was created with the vpc"
+}
+
 variable "vpn_instance_type" {
 	type = string
 	default = "t3.medium"

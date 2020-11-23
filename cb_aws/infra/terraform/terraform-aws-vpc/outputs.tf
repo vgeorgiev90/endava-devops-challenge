@@ -26,3 +26,6 @@ output "available_zones" {
   value = aws_subnet.public.*.availability_zone
 }
 
+output "security_group_generic" {
+  value = aws_security_group.generic.id
+}
