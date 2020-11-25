@@ -17,6 +17,41 @@ if [ -z $AWS_CLI ];then
 	pip install awscli
 fi
 
+
+mount_gp2_drive () {
+mkdir /data/db
+local device_check=$(df -h |grep nvm | awk '{print $1}' |cut -c 6-12)
+if [[ $device_check == "nvme1n1" ]];then
+     added_dev="nvme0n1"
+elif [[ $device_check == "nvme0n1" ]];then
+     added_dev="nvme1n1"
+fi
+local fs_check=$(file -s /dev/$added_dev | awk '{print $2}')
+
+if [[ $fs_check == "data" ]];then
+    mkfs -t ext4 /dev/$added_dev
+    mount /dev/$added_dev /data/db
+fi
+
+cp /etc/fstab /etc/fstab.orig
+echo "/dev/$${added_dev} /data/db ext4 defaults,nofail  0  0" >> /etc/fstab
+touch /data/db/migrated
+}
+
+
+if [ ! -f "/data/db/migrated" ];then
+        tar -czf /root/db.tgz /data/db
+        rm /data/db -rf
+        mount_gp2_drive
+        tar -xzf /root/db.tgz -C /data/db --strip-components 2
+        chown mongodb:mongodb /data/db
+        rm -rf /root/db.tgz
+        systemctl restart mongod
+else
+        echo "No need for data transfer file found /data/db/migrated"
+fi
+
+
 TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
 LOCAL_IP=`curl -H "X-aws-ec2-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/local-ipv4`
 BASE_DOMAIN=`aws route53 list-hosted-zones-by-name | grep $${ZONE_ID} -C 2 | grep -i name | awk -F":" '{print $2}' | awk -F"\"" '{print $2}'`

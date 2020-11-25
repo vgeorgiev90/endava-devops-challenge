@@ -108,7 +108,18 @@ resource "aws_launch_configuration" "elastic_config" {
   user_data_base64 = base64encode(templatefile("../../scripts/elastic_bootstrap.tpl", {zone = var.private_zone_id, env = var.name_prefix}))
   root_block_device {
     volume_type = "gp2"
+    volume_size = 20
+  }
+  
+  ebs_block_device {
+    device_name = "/dev/sdf"
+    volume_type = "gp2"
     volume_size = var.elastic_volume_size
+    delete_on_termination = false
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -140,6 +151,9 @@ resource "aws_autoscaling_group" "elastic_ag" {
     propagate_at_launch = true
   }]
 
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 ########### Autoscaling policies ################

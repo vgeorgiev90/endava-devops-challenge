@@ -86,8 +86,20 @@ resource "aws_launch_configuration" "mongo_config" {
   user_data_base64 = base64encode(templatefile("../../scripts/mongo_bootstrap.tpl", {zone = var.private_zone_id, env = var.name_prefix, mongo_admin_pass = var.mongo_root_password}))
   root_block_device {
     volume_type = "gp2"
-    volume_size = var.mongo_volume_size
+    volume_size = 20
   }
+
+  ebs_block_device {
+    device_name = "/dev/sdf"
+    volume_type = "gp2"
+    volume_size = var.mongo_volume_size
+    delete_on_termination = false
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 ############################ RMQ Autoscaling group ###########################
@@ -112,6 +124,10 @@ resource "aws_autoscaling_group" "mongo_ag" {
     value = "mongodb"
     propagate_at_launch = true
   }]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
 }
 
