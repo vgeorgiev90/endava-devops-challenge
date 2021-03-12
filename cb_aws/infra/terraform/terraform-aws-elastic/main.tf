@@ -98,7 +98,8 @@ locals {
 
 resource "aws_launch_configuration" "elastic_config" {
   name_prefix = "${var.name_prefix}-elasticsearch"
-  image_id = data.aws_ami.elastic_ami.id
+  #image_id = data.aws_ami.elastic_ami.id
+  image_id = "ami-027957ea28be834cd"
   instance_type = var.elastic_instance_type
   key_name = var.ssh_key_pair
   security_groups = [ var.security_group_id ]

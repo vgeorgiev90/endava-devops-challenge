@@ -24,7 +24,7 @@ data "aws_subnet_ids" "eks_public" {
 locals {
   private_subnet_list = tolist(data.aws_subnet_ids.eks_private.ids)
   public_subnet_list = tolist(data.aws_subnet_ids.eks_public.ids)
-  all_subnets = tolist(data.aws_subnet_ids.eks_private.ids, data.aws_subnet_ids.eks_public.ids)
+  all_subnets = concat(local.private_subnet_list, local.public_subnet_list)
 }
 
 
@@ -120,7 +120,7 @@ resource "aws_eks_node_group" "example" {
   instance_types = var.eks_nodes_instance_type
   
   remote_access {
-    eks_ssh_key = var.ssh_key
+    ec2_ssh_key = var.ssh_key
     source_security_group_ids = var.cluster_security_group
   }
 
@@ -135,7 +135,7 @@ resource "aws_eks_node_group" "example" {
   }
 
   depends_on = [aws_eks_cluster.eksCluster]
-  tags {
+  tags = {
     Name = "${var.name_prefix}-eks-node"
   }
 }
